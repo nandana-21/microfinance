@@ -23,15 +23,16 @@ CONTRACT loan : public contract{
       }
     }
 
-    TABLE group_info{
-      name acc_name;
-      uint64_t acc_id; //hash
-      name mem_name;
-      uint64_t mem_id; //singular----hash
-      asset loan_required;
 
-      auto primary_key() const{
-        return acc_name.value;
+
+    TABLE group_info{ //group leader should init this table ;;;;; primary key=group id
+      uint64_t group_id;
+      asset loan_required; //total loan of group
+      name acc_name; //group leader name
+      datastream<const char*> member_names; //hash of this is the group_id
+
+      uint64_t primary_key() const{
+        return group_id;
       }
     }
 
@@ -88,7 +89,9 @@ CONTRACT loan : public contract{
       }
     }
 
+  public:
 
+    ACTION member_to_leader()
 
 
 }
