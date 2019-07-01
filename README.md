@@ -1,4 +1,4 @@
-# microfinance
+# Microfinance
 
 What is Microfinance ?
 
