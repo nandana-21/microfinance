@@ -1,0 +1,242 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.1",
+    "types": [],
+    "structs": [
+        {
+            "name": "addborrower",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc_name",
+                    "type": "name"
+                },
+                {
+                    "name": "b_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "location",
+                    "type": "string"
+                },
+                {
+                    "name": "b_phone",
+                    "type": "uint64"
+                },
+                {
+                    "name": "loan_individual",
+                    "type": "asset"
+                },
+                {
+                    "name": "b_balance",
+                    "type": "asset"
+                },
+                {
+                    "name": "group_id",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "credit_score",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "borrower_info",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc_name",
+                    "type": "name"
+                },
+                {
+                    "name": "b_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "location",
+                    "type": "string"
+                },
+                {
+                    "name": "b_phone",
+                    "type": "uint64"
+                },
+                {
+                    "name": "loan_individual",
+                    "type": "asset"
+                },
+                {
+                    "name": "b_balance",
+                    "type": "asset"
+                },
+                {
+                    "name": "group_id",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "credit_score",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "group_info",
+            "base": "",
+            "fields": [
+                {
+                    "name": "group_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "total_loan",
+                    "type": "asset"
+                },
+                {
+                    "name": "member_names",
+                    "type": "string[]"
+                }
+            ]
+        },
+        {
+            "name": "lender_info",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc_name",
+                    "type": "name"
+                },
+                {
+                    "name": "acc_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "balance",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "loan_info",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc_name",
+                    "type": "name"
+                },
+                {
+                    "name": "lending_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "lent_group_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "interest_rate",
+                    "type": "uint64"
+                },
+                {
+                    "name": "payment_time",
+                    "type": "uint64"
+                },
+                {
+                    "name": "status",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "relayer_info",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc_name",
+                    "type": "name"
+                },
+                {
+                    "name": "acc_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "balance",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "underwriter_info",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc_name",
+                    "type": "name"
+                },
+                {
+                    "name": "acc_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "balance",
+                    "type": "asset"
+                },
+                {
+                    "name": "value_score",
+                    "type": "uint64"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "addborrower",
+            "type": "addborrower",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "borrower",
+            "type": "borrower_info",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "group",
+            "type": "group_info",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "lender",
+            "type": "lender_info",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "loan",
+            "type": "loan_info",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "relayer",
+            "type": "relayer_info",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "underwriter",
+            "type": "underwriter_info",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "ricardian_clauses": [],
+    "variants": []
+}

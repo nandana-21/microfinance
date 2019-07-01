@@ -1,6 +1,6 @@
-#include "mainloan.hpp"
+#include "/Users/macbookpro/Documents/contracts/microfinance/mainloan.hpp"
 
-void main_loan::add_borrower(name acc_name, uint64_t b_id, string location,
+void mainloan::addborrower(name acc_name, uint64_t b_id, string location,
                     uint64_t b_phone, asset loan_individual,
                     asset b_balance, checksum256 group_id, uint64_t credit_score)
 {
@@ -33,4 +33,4 @@ void main_loan::add_borrower(name acc_name, uint64_t b_id, string location,
 
 }
 ///namespace eosio
-EOSIO_DISPATCH(main_loan, (add_borrower))
+EOSIO_DISPATCH(mainloan, (addborrower))

@@ -6,7 +6,7 @@
 using namespace eosio;
 using namespace std;
 
-class [[eosio::contract("mainloan")]] main_loan : public eosio::contract{
+class [[eosio::contract]] mainloan : public eosio::contract{
   private:
     //table definitions
 
@@ -117,7 +117,7 @@ class [[eosio::contract("mainloan")]] main_loan : public eosio::contract{
   public:
     using contract::contract;
 
-    main_loan(eosio::name receiver, eosio::name code, datastream<const char*> ds):
+    mainloan(eosio::name receiver, eosio::name code, datastream<const char*> ds):
               eosio::contract(receiver, code, ds),
               borr_table(receiver, code.value),
               group_table(receiver, code.value),
@@ -130,7 +130,7 @@ class [[eosio::contract("mainloan")]] main_loan : public eosio::contract{
     }
 
     [[eosio::action]]
-    void add_borrower(name acc_name, uint64_t b_id, string location,
+    void addborrower(name acc_name, uint64_t b_id, string location,
                         uint64_t b_phone, asset loan_individual,
                         asset b_balance, checksum256 group_id, uint64_t credit_score);
 
