@@ -1,34 +1,35 @@
 #include <eosiolib/asset.hpp>
 #include <eosiolib/eosio.hpp>
+#include <eosiolib/print.hpp>
 #include <string>
 
 using namespace eosio;
 using namespace std;
 
-CONTRACT main_loan : public contract{
+class [[eosio::contract("mainloan")]] main_loan : public eosio::contract{
   private:
     //table definitions
 
-    TABLE borrower_info{
+    struct [[eosio::table]] borrower_info{
       name acc_name;
       uint64_t b_id; //hash
-      vector <string> location; //geohash or coordinates
+      string location; //geohash or coordinates
       uint64_t b_phone;
-      uint64_t group_type;
+      //uint64_t group_type;
       asset loan_individual;
       asset b_balance; //borrower account balance
-      uint64_t group_id; //hash function
+      checksum256 group_id; //hash function
       uint64_t credit_score;
 
       auto primary_key()const {
         return acc_name.value;
       }
-      uint64_t by_group_id() const{
+      checksum256 get_group_id() const{
         return group_id;
       }
     };
 
-    TABLE group_info{ //group leader should init this table ;;;;; primary key=group id
+    struct [[eosio::table]] group_info{ //group leader should init this table ;;;;; primary key=group id
       uint64_t group_id;
       asset total_loan; //total loan of group
       vector <string> member_names; //name is ended with '/' //hash of this is the group_id //CHANGE: make array //DONE
@@ -37,7 +38,7 @@ CONTRACT main_loan : public contract{
         return group_id;
       }
     };
-
+    /*
     TABLE shg_savings{ //NOT CONSIDERING
       uint64_t group_id;
       uint64_t saving_amnt;
@@ -45,9 +46,9 @@ CONTRACT main_loan : public contract{
       uint64_t primary_key() const{
         return group_id;
       }
-    };
+    };*/
 
-    TABLE underwriter_info{
+    struct [[eosio::table]] underwriter_info{
       name acc_name;
       uint64_t acc_id;
       asset balance;
@@ -59,7 +60,7 @@ CONTRACT main_loan : public contract{
       }
     };
 
-    TABLE lender_info{
+    struct [[eosio::table]] lender_info{
       name acc_name;
       uint64_t acc_id;
       asset balance;
@@ -69,7 +70,7 @@ CONTRACT main_loan : public contract{
       }
     };
 
-    TABLE relayer_info{
+    struct [[eosio::table]] relayer_info{
       name acc_name;
       uint64_t acc_id;
       asset balance;
@@ -79,7 +80,7 @@ CONTRACT main_loan : public contract{
       }
     };
 
-    TABLE loan_info{ //loan id needed to put
+    struct [[eosio::table]] loan_info{ //loan id needed to put
       name acc_name;
       asset lending_amount;
       uint64_t lent_group_id;
@@ -94,10 +95,9 @@ CONTRACT main_loan : public contract{
 
     //typedefs
     typedef eosio::multi_index<"borrower"_n, borrower_info,
-                                eosio::indexed_by<"groupId"_n,
-                                                  const_mem_fun<borrower_info, uint64_t, &borrower_info::by_group_id>>> borrower; //check
+                                eosio::indexed_by<"bygroupid"_n, const_mem_fun<borrower_info, checksum256, &borrower_info::get_group_id>>> borrower; //check
     typedef eosio::multi_index<"group"_n, group_info> group;
-    typedef eosio::multi_index<"shg"_n, shg_savings> shg; //NOT CONSIDERING
+    //typedef eosio::multi_index<"shg"_n, shg_savings> shg; //NOT CONSIDERING
     typedef eosio::multi_index<"underwriter"_n, underwriter_info> underwriter;
     typedef eosio::multi_index<"relayer"_n, relayer_info> relayer;
     typedef eosio::multi_index<"lender"_n, lender_info> lender;
@@ -106,29 +106,33 @@ CONTRACT main_loan : public contract{
     //init
     borrower borr_table;
     group group_table;
-    shg shg_table;
+    //shg shg_table;
     underwriter uwr_table;
     relayer relayer_table;
     lender lender_table;
     loan loan_table;
 
 
-    vector <string> location; //geohash or coordinates
-    uint64_t b_phone;
-    uint64_t group_type;
-    asset loan_individual;
-    asset b_balance; //borrower account balance
-    uint64_t group_id; //hash function
-    uint64_t credit_score;
-
-
 
   public:
     using contract::contract;
 
-    ACTION add_borrower(name acc_name, uint64_t b_id, vector<string> location,
-                        uint64_t b_phone, uint64_t group_type, asset loan_individual,
-                        asset b_balance, uint64_t group_id, uint64_t credit_score);
+    main_loan(eosio::name receiver, eosio::name code, datastream<const char*> ds):
+              eosio::contract(receiver, code, ds),
+              borr_table(receiver, code.value),
+              group_table(receiver, code.value),
+              uwr_table(receiver, code.value),
+              relayer_table(receiver, code.value),
+              lender_table(receiver, code.value),
+              loan_table(receiver, code.value){
+
+
+    }
+
+    [[eosio::action]]
+    void add_borrower(name acc_name, uint64_t b_id, string location,
+                        uint64_t b_phone, asset loan_individual,
+                        asset b_balance, checksum256 group_id, uint64_t credit_score);
 
 
 };
