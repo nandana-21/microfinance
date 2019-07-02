@@ -43,7 +43,7 @@ void mainloan::makegroup(name acc_name){
     });
   }
 }
-
+/*
 void mainloan::adduwr(name acc_name, uint64_t acc_id, asset balance){ //not working; same error repeating for all tables below
   require_auth(_self);
 
@@ -51,9 +51,10 @@ void mainloan::adduwr(name acc_name, uint64_t acc_id, asset balance){ //not work
     u.acc_name = acc_name;
     u.acc_id = acc_id;
     u.balance = balance;
+    u.value_score = 0;
   });
 
-}
+}*/
 
 /*
 //COMMENTED BECAUSE NOT WORKING
@@ -124,18 +125,25 @@ void mainloan::addloaninfo(name acc_name, asset lending_amount, uint64_t lent_gr
 void mainloan::getborrower(name acc_name){
 
   auto borrower = borr_table.get(acc_name.value);
+  auto itr = group_table.find(borrower.group_id);
+  eosio::check(itr==group_table.end(), "nahi chal raha");
   eosio::check(borrower.acc_name==acc_name, "Borrower doesn't exist.");
 
-  print("Borrower Details: ", borrower.acc_name);
-  print("ID: ", borrower.b_id);
-  print("Location: ", borrower.location);
-  print("Phone Number: ", borrower.b_phone);
-  print("Loan Individual: ", borrower.loan_individual);
-  print("Balance: ", borrower.b_balance);
-  print("Group ID: ", borrower.group_id);
-  print("Credit Score: ", borrower.credit_score);
-
+  eosio::print("Borrower Details:::: ", borrower.acc_name);
+  eosio::print("group id: ", itr->group_id);
+  eosio::print("totsl loan: ", itr->total_loan);
+  eosio::print("names: ");
+  for (int i=0; i<itr->member_names.size(); i++){
+    eosio::print(itr->member_names.at(i), ", ");
+  }
+  eosio::print(" ID: ", borrower.b_id);
+  eosio::print("Location: ", borrower.location);
+  eosio::print("Phone Number: ", borrower.b_phone);
+  eosio::print("Loan Individual: ", borrower.loan_individual);
+  eosio::print("Balance: ", borrower.b_balance);
+  eosio::print("Group ID: ", borrower.group_id);
+  eosio::print("Credit Score: ", borrower.credit_score);
 }
 
 ///namespace eosio
-EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(makegroup)(getborrower))
+EOSIO_DISPATCH(mainloan, (addborrower)(makegroup)(getborrower))

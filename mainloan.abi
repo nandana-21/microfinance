@@ -151,7 +151,17 @@
                 },
                 {
                     "name": "status",
-                    "type": "uint64"
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "makegroup",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc_name",
+                    "type": "name"
                 }
             ]
         },
@@ -205,6 +215,11 @@
         {
             "name": "getborrower",
             "type": "getborrower",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "makegroup",
+            "type": "makegroup",
             "ricardian_contract": ""
         }
     ],
