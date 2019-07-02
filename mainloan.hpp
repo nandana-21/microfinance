@@ -42,7 +42,6 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     TABLE shg_savings{ //NOT CONSIDERING
       uint64_t group_id;
       uint64_t saving_amnt;
-
       uint64_t primary_key() const{
         return group_id;
       }
@@ -86,7 +85,7 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       uint64_t lent_group_id;
       uint64_t interest_rate;
       uint64_t payment_time;
-      uint64_t status=0; //0-incomplete 1-complete
+      bool status=0; //0-incomplete 1-complete
 
       auto primary_key() const{
         return acc_name;
@@ -133,6 +132,24 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     void addborrower(name acc_name, uint64_t b_id, string location,
                         uint64_t b_phone, asset loan_individual,
                         asset b_balance, checksum256 group_id, uint64_t credit_score);
+
+    [[eosio::action]]
+    void addgroupinfo(uint64_t group_id, asset total_loan, vector <string> member_names);
+
+    [[eosio::action]]
+    void addunderwriter(name acc_name, uint64_t acc_id, asset balance, uint64_t value_score);
+
+    [[eosio::action]]
+    void addrelayer(name acc_name, uint64_t acc_id, asset balance);
+
+    [[eosio::action]]
+    void addlender(name acc_name, uint64_t acc_id, asset balance);
+
+    [[eosio::action]]
+    void addloaninfo(name acc_name, asset lending_amount, uint64_t lent_group_id,
+                    uint64_t interest_rate, uint64_t payment_time, bool status);
+
+)
 
 
 };
