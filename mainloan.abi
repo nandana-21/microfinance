@@ -33,7 +33,7 @@
                 },
                 {
                     "name": "group_id",
-                    "type": "checksum256"
+                    "type": "uint64"
                 },
                 {
                     "name": "credit_score",
@@ -71,11 +71,21 @@
                 },
                 {
                     "name": "group_id",
-                    "type": "checksum256"
+                    "type": "uint64"
                 },
                 {
                     "name": "credit_score",
                     "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "getborrower",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc_name",
+                    "type": "name"
                 }
             ]
         },
@@ -190,6 +200,11 @@
         {
             "name": "addborrower",
             "type": "addborrower",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "getborrower",
+            "type": "getborrower",
             "ricardian_contract": ""
         }
     ],
