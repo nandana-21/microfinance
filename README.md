@@ -1,6 +1,6 @@
-# microfinance
-heeloooooooooooo
-HIiiiiiii
+#Microfinance
+
+copy the content of the hpp file into cpp if it's not working (showing an file not found error)
 
 front end:
 -when borrower is making an account:
