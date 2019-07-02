@@ -1,6 +1,7 @@
 #include <eosiolib/asset.hpp>
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/print.hpp>
+#include <eosiolib/crypto.h>
 #include <string>
 
 using namespace eosio;
@@ -18,13 +19,13 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       //uint64_t group_type;
       asset loan_individual;
       asset b_balance; //borrower account balance
-      checksum256 group_id; //hash function
+      uint64_t group_id; //hash function
       uint64_t credit_score;
 
       auto primary_key()const {
         return acc_name.value;
       }
-      checksum256 get_group_id() const{
+      uint64_t get_group_id() const{
         return group_id;
       }
     };
@@ -94,7 +95,7 @@ class [[eosio::contract]] mainloan : public eosio::contract{
 
     //typedefs
     typedef eosio::multi_index<"borrower"_n, borrower_info,
-                                eosio::indexed_by<"bygroupid"_n, const_mem_fun<borrower_info, checksum256, &borrower_info::get_group_id>>> borrower; //check
+                                eosio::indexed_by<"bygroupid"_n, const_mem_fun<borrower_info, uint64_t, &borrower_info::get_group_id>>> borrower; //check
     typedef eosio::multi_index<"group"_n, group_info> group;
     //typedef eosio::multi_index<"shg"_n, shg_savings> shg; //NOT CONSIDERING
     typedef eosio::multi_index<"underwriter"_n, underwriter_info> underwriter;
@@ -123,15 +124,16 @@ class [[eosio::contract]] mainloan : public eosio::contract{
               uwr_table(receiver, code.value),
               relayer_table(receiver, code.value),
               lender_table(receiver, code.value),
-              loan_table(receiver, code.value){
+              loan_table(receiver, code.value){}
 
-
-    }
 
     [[eosio::action]]
     void addborrower(name acc_name, uint64_t b_id, string location,
                         uint64_t b_phone, asset loan_individual,
-                        asset b_balance, checksum256 group_id, uint64_t credit_score);
+                        asset b_balance, uint64_t group_id, uint64_t credit_score);
+
+    [[eosio::action]]
+    void getborrower(name acc_name);
 
     [[eosio::action]]
     void addgroupinfo(uint64_t group_id, asset total_loan, vector <string> member_names);
