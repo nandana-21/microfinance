@@ -46,7 +46,7 @@ class [[eosio::contract]] mainloan : public eosio::contract{
 
 
       auto primary_key() const{
-        return acc_name;
+        return acc_name.value;
       }
     };
 
@@ -56,7 +56,7 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       asset balance;
 
       auto primary_key() const{
-        return acc_name;
+        return acc_name.value;
       }
     };
 
@@ -66,7 +66,7 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       asset balance;
 
       auto primary_key() const{
-        return acc_name;
+        return acc_name.value;
       }
     };
 
@@ -79,7 +79,7 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       bool status=0;
 
       auto primary_key() const{
-        return acc_name;
+        return acc_name.value;
       }
     };
 
@@ -122,13 +122,13 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     [[eosio::action]]
     void makegroup(name acc_name);
 
-    // [[eosio::action]]
-    // void adduwr(name acc_name, uint64_t acc_id, asset balance);
-    //
-    // [[eosio::action]]
-    // void addrelayer(name acc_name, uint64_t acc_id, asset balance);
-    //
-    // [[eosio::action]]
-    // void addlender(name acc_name, uint64_t acc_id, asset balance);
+    [[eosio::action]]
+    void adduwr(name acc_name, uint64_t acc_id, asset balance);
+
+    [[eosio::action]]
+    void addrelayer(name acc_name, uint64_t acc_id, asset balance);
+
+    [[eosio::action]]
+    void addlender(name acc_name, uint64_t acc_id, asset balance);
 
 };

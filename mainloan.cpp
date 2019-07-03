@@ -1,4 +1,4 @@
-#include "/Users/macbookpro/Documents/contracts/microfinance/mainloan.hpp"
+#include "/Users/macbookpro/Documents/contracts/mainloan/mainloan.hpp"
 
 void mainloan::addborrower(name acc_name, uint64_t b_id, string location,
                     uint64_t b_phone, asset loan_individual,
@@ -44,35 +44,34 @@ void mainloan::makegroup(name acc_name){
   }
 }
 /*
-void mainloan::adduwr(name acc_name, uint64_t acc_id, asset balance){ //not working; same error repeating for all tables below
+void mainloan::adduwr(name acc_name, uint64_t ){ //not working; same error repeating for all tables below
   require_auth(_self);
 
   uwr_table.emplace(get_self(), [&](auto& u){
-    u.acc_name = acc_name;
-    u.acc_id = acc_id;
-    u.balance = balance;
+    //u.acc_name = acc_name;
+    //u.acc_id = acc_id;
+    //u.balance = balance;
     u.value_score = 0;
   });
 
 }*/
 
-/*
+
 //COMMENTED BECAUSE NOT WORKING
-void mainloan::adduwr(name acc_name, uint64_t acc_id,
-                                asset balance, uint64_t value_score)
+void mainloan::adduwr(name acc_name, uint64_t acc_id, asset balance)
 {
     print("Adding underwriter", acc_name);
     require_auth( _self );
 
       eosio::check(balance.amount >= 0, "balance must be positive");
-      eosio::check(value_score>=300 && value_score<=900, "credit score is always postive and ranges from 300-900");
+      //eosio::check(value_score>=300 && value_score<=900, "credit score is always postive and ranges from 300-900");
 
 
       uwr_table.emplace(get_self(), [&](auto& u) {
           u.acc_name = acc_name;
           u.acc_id = acc_id;
           u.balance = balance;
-          u.value_score = value_score;
+          u.value_score = 0;
       });
 }
 
@@ -102,7 +101,7 @@ void mainloan::addlender(name acc_name, uint64_t acc_id, asset balance)
         l.acc_id = acc_id;
         l.balance = balance;
     });
-}*/
+}
 /*
 void mainloan::addloaninfo(name acc_name, asset lending_amount, uint64_t lent_group_id,
                           uint64_t interest_rate, uint64_t payment_time)
@@ -146,4 +145,4 @@ void mainloan::getborrower(name acc_name){
 }
 
 ///namespace eosio
-EOSIO_DISPATCH(mainloan, (addborrower)(makegroup)(getborrower))
+EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addlender)(addrelayer)(makegroup)(getborrower))
