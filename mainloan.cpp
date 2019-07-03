@@ -1,4 +1,6 @@
-#include "/Users/macbookpro/Documents/contracts/mainloan/mainloan.hpp"
+//CPP file starts here
+
+include "mainloan.hpp"
 
 void mainloan::addborrower(name acc_name, uint64_t b_id, string location,
                     uint64_t b_phone, uint64_t loan_individual,
@@ -68,8 +70,10 @@ void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64
     l.borr_id = borrower->b_id;
     l.interest_rate = rate;
     l.payment_time = pay_time;
+    l.emi = loan_amnt*rate*pow(1+rate, pay_time)/(pow(1+rate, pay_time)-1);
+    l.return_value = l.emi*pay_time;
   });
-  print("Added loan.");
+  print("Loan Added");
 }
 
 ///namespace eosio

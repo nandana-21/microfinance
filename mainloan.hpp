@@ -1,9 +1,11 @@
+//HPP file here
 #include <eosiolib/asset.hpp>
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/print.hpp>
 #include <eosiolib/crypto.h>
 #include <string>
 #include <vector>
+#include <cmath>
 
 using namespace eosio;
 using namespace std;
@@ -43,6 +45,8 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       uint64_t borr_id;
       uint64_t interest_rate;
       uint64_t payment_time;
+      uint64_t emi=0;
+      uint64_t return_value;
       bool status=0;
 
       auto primary_key() const{

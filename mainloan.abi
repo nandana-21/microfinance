@@ -162,6 +162,14 @@
                     "type": "uint64"
                 },
                 {
+                    "name": "emi",
+                    "type": "uint64"
+                },
+                {
+                    "name": "return_value",
+                    "type": "uint64"
+                },
+                {
                     "name": "status",
                     "type": "bool"
                 }

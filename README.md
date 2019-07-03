@@ -1,9 +1,8 @@
-#Microfinance
+# Microfinance #
 
-copy the content of the hpp file into cpp if it's not working (showing an file not found error)
+**If code is showing an file location error then put the contents of
+hpp file into cpp file**
 
-front end:
--when borrower is making an account:
-  |will be asked if its a new group or part of an existing group
-    -if new group, new group id will be generated which he would be asked to share with his group members
-    -if existing, he will input the generated group id.
+## What is Microfinance ? ##
+
+Microfinance, also called Microcredit​, is a type of banking service that is provided to unemployed or low-income individuals or groups who otherwise would have no other access to financial services ie unbanked or underbanked. While institutions participating in the area of microfinance most often provide lending, many banks offer additional services, such as checking and savings accounts, and micro-insurance products; and some even provide financial and business education. Ultimately, the goal of microfinance is to give impoverished people an opportunity to become self-sufficient.
