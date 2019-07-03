@@ -25,11 +25,11 @@
                 },
                 {
                     "name": "loan_individual",
-                    "type": "asset"
+                    "type": "uint64"
                 },
                 {
                     "name": "b_balance",
-                    "type": "asset"
+                    "type": "uint64"
                 },
                 {
                     "name": "group_id",
@@ -37,6 +37,32 @@
                 },
                 {
                     "name": "credit_score",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "addloan",
+            "base": "",
+            "fields": [
+                {
+                    "name": "uwr_name",
+                    "type": "name"
+                },
+                {
+                    "name": "borr_name",
+                    "type": "name"
+                },
+                {
+                    "name": "loan_amnt",
+                    "type": "uint64"
+                },
+                {
+                    "name": "rate",
+                    "type": "uint64"
+                },
+                {
+                    "name": "pay_time",
                     "type": "uint64"
                 }
             ]
@@ -55,7 +81,7 @@
                 },
                 {
                     "name": "balance",
-                    "type": "asset"
+                    "type": "uint64"
                 }
             ]
         },
@@ -81,11 +107,11 @@
                 },
                 {
                     "name": "loan_individual",
-                    "type": "asset"
+                    "type": "uint64"
                 },
                 {
                     "name": "b_balance",
-                    "type": "asset"
+                    "type": "uint64"
                 },
                 {
                     "name": "credit_score",
@@ -108,12 +134,16 @@
             "base": "",
             "fields": [
                 {
+                    "name": "load_id",
+                    "type": "uint64"
+                },
+                {
                     "name": "uwr_name",
                     "type": "name"
                 },
                 {
                     "name": "lending_amount",
-                    "type": "asset"
+                    "type": "uint64"
                 },
                 {
                     "name": "borr_name",
@@ -151,7 +181,7 @@
                 },
                 {
                     "name": "balance",
-                    "type": "asset"
+                    "type": "uint64"
                 }
             ]
         }
@@ -160,6 +190,11 @@
         {
             "name": "addborrower",
             "type": "addborrower",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "addloan",
+            "type": "addloan",
             "ricardian_contract": ""
         },
         {

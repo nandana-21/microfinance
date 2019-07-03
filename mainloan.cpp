@@ -1,14 +1,14 @@
 #include "/Users/macbookpro/Documents/contracts/mainloan/mainloan.hpp"
 
 void mainloan::addborrower(name acc_name, uint64_t b_id, string location,
-                    uint64_t b_phone, asset loan_individual,
-                    asset b_balance, uint64_t group_id, uint64_t credit_score)
+                    uint64_t b_phone, uint64_t loan_individual,
+                    uint64_t b_balance, uint64_t group_id, uint64_t credit_score)
 {
   print("Adding borrower: ", acc_name);
   require_auth( _self ); //authorization of the contract account
 
-    eosio::check(loan_individual.amount >= 0, "loan must be positive");
-    eosio::check(b_balance.amount >= 0, "balance must be positive");
+    eosio::check(loan_individual >= 0, "loan must be positive");
+    eosio::check(b_balance >= 0, "balance must be positive");
 
     borr_table.emplace(get_self(), [&](auto& b) {
         b.acc_name = acc_name;
@@ -20,12 +20,12 @@ void mainloan::addborrower(name acc_name, uint64_t b_id, string location,
   });
 }
 
-void mainloan::adduwr(name acc_name, uint64_t acc_id, asset balance)
+void mainloan::adduwr(name acc_name, uint64_t acc_id, uint64_t balance)
 {
     print("Adding underwriter", acc_name);
     require_auth( _self );
 
-      eosio::check(balance.amount >= 0, "balance must be positive");
+      eosio::check(balance >= 0, "balance must be positive");
       //eosio::check(value_score>=300 && value_score<=900, "credit score is always postive and ranges from 300-900");
 
       uwr_table.emplace(get_self(), [&](auto& u) {
@@ -49,5 +49,28 @@ void mainloan::getborrower(name acc_name){
   eosio::print("Credit Score: ", borrower.credit_score);
 }
 
+void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64_t rate, uint64_t pay_time){
+
+  require_auth( _self );
+  eosio::check(loan_amnt>0, "Cannot loan in negatives!");
+  eosio::check(rate>=0, "Interst rate cannot be negative!");
+  eosio::check(pay_time>0, "Cannot be zero or negative!");
+  auto borrower = borr_table.find(borr_name.value);
+  auto uwr = uwr_table.find(uwr_name.value);
+  eosio::check(borrower!=borr_table.end(), "Borrower doesn't exist.");
+  eosio::check(uwr!=uwr_table.end(), "Lender doesn't exist.");
+
+  loan_table.emplace(get_self(), [&](auto &l){
+    l.load_id = loan_table.available_primary_key();
+    l.uwr_name = uwr_name;
+    l.lending_amount = loan_amnt;
+    l.borr_name = borr_name;
+    l.borr_id = borrower->b_id;
+    l.interest_rate = rate;
+    l.payment_time = pay_time;
+  });
+  print("Added loan.");
+}
+
 ///namespace eosio
-EOSIO_DISPATCH(mainloan, (addborrower)(getborrower))
+EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower))

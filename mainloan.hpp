@@ -16,8 +16,8 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       uint64_t b_id;
       string location;
       uint64_t b_phone;
-      asset loan_individual;
-      asset b_balance;
+      uint64_t loan_individual;
+      uint64_t b_balance;
       uint64_t credit_score=0;
 
       auto primary_key()const {
@@ -28,7 +28,7 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     struct [[eosio::table]] underwriter_info{
       name acc_name;
       uint64_t acc_id;
-      asset balance;
+      uint64_t balance;
 
       auto primary_key() const{
         return acc_name.value;
@@ -36,8 +36,9 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     };
 
     struct [[eosio::table]] loan_info{
+      uint64_t load_id;
       name uwr_name;
-      asset lending_amount;
+      uint64_t lending_amount;
       name borr_name;
       uint64_t borr_id;
       uint64_t interest_rate;
@@ -76,12 +77,15 @@ class [[eosio::contract]] mainloan : public eosio::contract{
 
     [[eosio::action]]
     void addborrower(name acc_name, uint64_t b_id, string location,
-                        uint64_t b_phone, asset loan_individual,
-                        asset b_balance, uint64_t group_id, uint64_t credit_score);
+                        uint64_t b_phone, uint64_t loan_individual,
+                        uint64_t b_balance, uint64_t group_id, uint64_t credit_score);
 
     [[eosio::action]]
     void getborrower(name acc_name);
 
     [[eosio::action]]
-    void adduwr(name acc_name, uint64_t acc_id, asset balance);
+    void adduwr(name acc_name, uint64_t acc_id, uint64_t balance);
+
+    [[eosio::action]]
+    void addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64_t rate, uint64_t pay_time);
 };
