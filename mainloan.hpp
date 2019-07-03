@@ -29,14 +29,15 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       }
     };
 
-    struct [[eosio::table]] group_info {
-      uint64_t group_id;
-      asset total_loan;
-      vector <string> member_names;
-      uint64_t primary_key() const{
-        return group_id;
-      }
-    };
+    // struct [[eosio::table]] group_info {
+    //   uint64_t group_id;
+    //   asset total_loan;
+    //   vector <string> member_names;
+    //
+    //   uint64_t primary_key() const{
+    //     return group_id;
+    //   }
+    // };
 
     struct [[eosio::table]] underwriter_info{
       name acc_name;
@@ -50,25 +51,25 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       }
     };
 
-    struct [[eosio::table]] lender_info{
-      name acc_name;
-      uint64_t acc_id;
-      asset balance;
+    // struct [[eosio::table]] lender_info{
+    //   name acc_name;
+    //   uint64_t acc_id;
+    //   asset balance;
+    //
+    //   auto primary_key() const{
+    //     return acc_name.value;
+    //   }
+    // };
 
-      auto primary_key() const{
-        return acc_name.value;
-      }
-    };
-
-    struct [[eosio::table]] relayer_info{
-      name acc_name;
-      uint64_t acc_id;
-      asset balance;
-
-      auto primary_key() const{
-        return acc_name.value;
-      }
-    };
+    // struct [[eosio::table]] relayer_info{
+    //   name acc_name;
+    //   uint64_t acc_id;
+    //   asset balance;
+    //
+    //   auto primary_key() const{
+    //     return acc_name.value;
+    //   }
+    // };
 
     struct [[eosio::table]] loan_info{
       name acc_name;
@@ -85,17 +86,17 @@ class [[eosio::contract]] mainloan : public eosio::contract{
 
     typedef eosio::multi_index<"borrower"_n, borrower_info,
                                 eosio::indexed_by<"bygroupid"_n, const_mem_fun<borrower_info, uint64_t, &borrower_info::get_group_id>>> borrower;
-    typedef eosio::multi_index<"group"_n, group_info> group;
+    //typedef eosio::multi_index<"group"_n, group_info> group;
     typedef eosio::multi_index<"underwriter"_n, underwriter_info> underwriter;
-    typedef eosio::multi_index<"relayer"_n, relayer_info> relayer;
-    typedef eosio::multi_index<"lender"_n, lender_info> lender;
+    //typedef eosio::multi_index<"relayer"_n, relayer_info> relayer;
+    //typedef eosio::multi_index<"lender"_n, lender_info> lender;
     typedef eosio::multi_index<"loan"_n, loan_info> loan;
 
     borrower borr_table;
-    group group_table;
+    //group group_table;
     underwriter uwr_table;
-    relayer relayer_table;
-    lender lender_table;
+    //relayer relayer_table;
+    //lender lender_table;
     loan loan_table;
 
   public:
@@ -104,10 +105,10 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     mainloan(eosio::name receiver, eosio::name code, datastream<const char*> ds):
               eosio::contract(receiver, code, ds),
               borr_table(receiver, code.value),
-              group_table(receiver, code.value),
+              //group_table(receiver, code.value),
               uwr_table(receiver, code.value),
-              relayer_table(receiver, code.value),
-              lender_table(receiver, code.value),
+              //relayer_table(receiver, code.value),
+              //lender_table(receiver, code.value),
               loan_table(receiver, code.value){}
 
 
@@ -120,15 +121,5 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     void getborrower(name acc_name);
 
     [[eosio::action]]
-    void makegroup(name acc_name);
-
-    [[eosio::action]]
     void adduwr(name acc_name, uint64_t acc_id, asset balance);
-
-    [[eosio::action]]
-    void addrelayer(name acc_name, uint64_t acc_id, asset balance);
-
-    [[eosio::action]]
-    void addlender(name acc_name, uint64_t acc_id, asset balance);
-
 };
