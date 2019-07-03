@@ -9,17 +9,14 @@ void mainloan::addborrower(name acc_name, uint64_t b_id, string location,
 
     eosio::check(loan_individual.amount >= 0, "loan must be positive");
     eosio::check(b_balance.amount >= 0, "balance must be positive");
-    eosio::check(credit_score>=300 && credit_score<=900, "credit score is always postive and ranges from 300-900");
 
     borr_table.emplace(get_self(), [&](auto& b) {
         b.acc_name = acc_name;
         b.b_id = b_id;
         b.location = location;
         b.b_phone = b_phone;
-        b.loan_individual.amount = loan_individual;
-        b.b_balance.amount = b_balance;
-        b.group_id = group_id;
-        b.credit_score = credit_score;
+        b.loan_individual = loan_individual;
+        b.b_balance = b_balance;
   });
 }
 
@@ -35,7 +32,6 @@ void mainloan::adduwr(name acc_name, uint64_t acc_id, asset balance)
           u.acc_name = acc_name;
           u.acc_id = acc_id;
           u.balance = balance;
-          u.value_score = 0;
       });
 }
 
@@ -50,7 +46,6 @@ void mainloan::getborrower(name acc_name){
   eosio::print("Phone Number: ", borrower.b_phone);
   eosio::print("Loan Individual: ", borrower.loan_individual);
   eosio::print("Balance: ", borrower.b_balance);
-  eosio::print("Group ID: ", borrower.group_id);
   eosio::print("Credit Score: ", borrower.credit_score);
 }
 
