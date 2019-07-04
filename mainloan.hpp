@@ -85,14 +85,21 @@ class [[eosio::contract]] mainloan : public eosio::contract{
                         uint64_t b_phone, uint64_t loan_individual,
                         uint64_t b_balance, uint64_t group_id, uint64_t credit_score);
 
-    [[eosio::action]]
-    void getborrower(name acc_name);
 
     [[eosio::action]]
     void adduwr(name acc_name, uint64_t acc_id, uint64_t balance);
 
     [[eosio::action]]
     void addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64_t rate, uint64_t pay_time);
+    
+    [[eosio::action]]
+    void getborrower(name acc_name);
+
+    [[eosio::action]]
+    void getuwr(name acc_name);
+
+    //[[eosio::action]]
+    //void getloan(name acc_name);
 
     // this action will be called by the deferred transaction
     // deferred loan giving after every month
@@ -105,3 +112,4 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     [[eosio::action]]
     void onanerror(const onerror &error);
 };
+

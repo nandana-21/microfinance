@@ -35,20 +35,6 @@ void mainloan::adduwr(name acc_name, uint64_t acc_id, uint64_t balance)
       });
 }
 
-void mainloan::getborrower(name acc_name){
-
-  auto borrower = borr_table.get(acc_name.value);
-  eosio::check(borrower.acc_name==acc_name, "Borrower doesn't exist.");
-
-  eosio::print("Borrower Details: ", borrower.acc_name);
-  eosio::print(" ID: ", borrower.b_id);
-  eosio::print("Location: ", borrower.location);
-  eosio::print("Phone Number: ", borrower.b_phone);
-  eosio::print("Loan Individual: ", borrower.loan_individual);
-  eosio::print("Balance: ", borrower.credit_amnt);
-  eosio::print("Credit Score: ", borrower.credit_score);
-}
-
 void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64_t rate, uint64_t pay_time){
 
   require_auth( _self );
@@ -72,6 +58,30 @@ void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64
     l.return_value = l.emi*pay_time;
   });
   print("Loan Added");
+}
+
+void mainloan::getborrower(name acc_name){
+
+  auto borrower = borr_table.get(acc_name.value);
+  eosio::check(borrower.acc_name==acc_name, "Borrower doesn't exist.");
+
+  eosio::print("Borrower Details: ", borrower.acc_name);
+  eosio::print(" ID: ", borrower.b_id);
+  eosio::print("Location: ", borrower.location);
+  eosio::print("Phone Number: ", borrower.b_phone);
+  eosio::print("Loan Individual: ", borrower.loan_individual);
+  eosio::print("Balance: ", borrower.credit_amnt);
+  eosio::print("Credit Score: ", borrower.credit_score);
+}
+
+void mainloan::getuwr(name acc_name){
+
+  auto underwriter = uwr_table.get(acc_name.value);
+  eosio::check(underwriter.acc_name==acc_name, "Underwriter doesn't exist.");
+
+  eosio::print("underwriter Details: ", underwriter.acc_name);
+  eosio::print(" ID: ", underwriter.acc_id);
+  eosio::print("Balance: ", underwriter.balance);
 }
 
 void mainloan::deferred(name from, uint64_t loanpm, name to)
@@ -122,4 +132,4 @@ extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
 }
 
 ///namespace eosio
-EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(deferred)(send))
+EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(deferred)(send))
