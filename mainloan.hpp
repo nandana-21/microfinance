@@ -103,11 +103,11 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     void send(name from, const string &message, uint64_t delay);
 
     [[eosio::action]]
-    void onError(const onerror &error);
+    void onanerror(const onerror &error);
 };
 
 extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
-  if (code=="eosio"_n.value && action=="onerror"_n.value){
+  if (code=="eosio"_n.value && action=="onanerror"_n.value){
     eosio::execute_action(eosio::name(receiver), eosio::name(code),
       &deferred_example::onError);
   }

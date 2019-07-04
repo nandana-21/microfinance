@@ -103,17 +103,17 @@ void mainloan::send(name from, bool check, name to, uint64_t loanpm)
 
        t.send(now(), from /*, false */);
 
-        print("Scheduled with a delay of ", delay);
+        print("Scheduled with a delay of 30 days.");
 }
 
-void mainloan::onError(onerror &error){
+void mainloan::onanerror(onerror &error){
 
         print("Resending Transaction: ", error.sender_id);
-        eosio::transaction dtxn = error.unpack_sent_txn();
+        eosio::transaction dtrx = error.unpack_sent_trx();
         dtrx.delay_sec = 2;
         dtrx.send(now(), _self);
 }
 
 
 ///namespace eosio
-EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(deferred)(send)(apply))
+EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(deferred)(send))
