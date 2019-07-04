@@ -162,6 +162,16 @@
             ]
         },
         {
+            "name": "getuwr",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc_name",
+                    "type": "name"
+                }
+            ]
+        },
+        {
             "name": "loan_info",
             "base": "",
             "fields": [
@@ -304,6 +314,11 @@
         {
             "name": "getborrower",
             "type": "getborrower",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "getuwr",
+            "type": "getuwr",
             "ricardian_contract": ""
         },
         {

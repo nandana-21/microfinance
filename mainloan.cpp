@@ -75,20 +75,6 @@ void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64
   print("Loan Added");
 }
 
-void mainloan::getborrower(name acc_name){
-
-  auto borrower = borr_table.get(acc_name.value);
-  eosio::check(borrower.acc_name==acc_name, "Borrower doesn't exist.");
-
-  eosio::print("Borrower Details: ", borrower.acc_name);
-  eosio::print(" ID: ", borrower.b_id);
-  eosio::print("Location: ", borrower.location);
-  eosio::print("Phone Number: ", borrower.b_phone);
-  eosio::print("Loan Individual: ", borrower.loan_individual);
-  eosio::print("Balance: ", borrower.credit_amnt);
-  eosio::print("Credit Score: ", borrower.credit_score);
-}
-
 void mainloan::getuwr(name acc_name){
 
   auto underwriter = uwr_table.get(acc_name.value);
