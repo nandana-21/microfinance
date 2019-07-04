@@ -100,15 +100,8 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     void deferred(name from, uint64_t loanpm, name to);
 
     [[eosio::action]]
-    void send(name from, const string &message, uint64_t delay);
+    void send(name from, bool check, name to, uint64_t loanpm);
 
     [[eosio::action]]
     void onanerror(const onerror &error);
 };
-
-extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
-  if (code=="eosio"_n.value && action=="onanerror"_n.value){
-    eosio::execute_action(eosio::name(receiver), eosio::name(code),
-      &deferred_example::onError);
-  }
-}

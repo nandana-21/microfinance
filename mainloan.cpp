@@ -77,14 +77,14 @@ void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64
 void mainloan::deferred(name from, uint64_t loanpm, name to)
 {
         require_auth(from);
-        auto itr = borr_table.find(to.value);
+        auto itr = borr_table.get(to.value);
         auto itr2 = uwr_table.find(from.value);
-        eosio::check(itr!=borr_table.end(), "Borrower doesn't exist.");
+        eosio::check(itr.acc_name==to, "Borrower doesn't exist.");
         eosio::check(itr2!=uwr_table.end(), "Lender doesn't exist.");
         eosio::check(loanpm>0, "Cannot loan in negatives!");
 
         print("Deferred loan from ", from, " for credit of ", loanpm, " to ", to);
-        itr->credit_amnt += loanpm;
+        itr.credit_amnt += loanpm;
 }
 
 void mainloan::send(name from, bool check, name to, uint64_t loanpm)
@@ -106,7 +106,7 @@ void mainloan::send(name from, bool check, name to, uint64_t loanpm)
         print("Scheduled with a delay of 30 days.");
 }
 
-void mainloan::onanerror(onerror &error){
+void mainloan::onanerror(const onerror &error){
 
         print("Resending Transaction: ", error.sender_id);
         eosio::transaction dtrx = error.unpack_sent_trx();
@@ -114,6 +114,12 @@ void mainloan::onanerror(onerror &error){
         dtrx.send(now(), _self);
 }
 
+extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
+  if (code=="eosio"_n.value && action=="onanerror"_n.value){
+    eosio::execute_action(eosio::name(receiver), eosio::name(code),
+      &mainloan::onanerror);
+  }
+}
 
 ///namespace eosio
 EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(deferred)(send))
