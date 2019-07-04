@@ -122,8 +122,8 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     [[eosio::action]]
     void getuwr(name acc_name);
 
-    //[[eosio::action]]
-    //void getloan(name acc_name);
+    [[eosio::action]]
+    void getloan(uint64_t loan_id);
 
     // this action will be called by the deferred transaction
     // deferred loan giving after every month
@@ -136,4 +136,3 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     [[eosio::action]]
     void onanerror(const onerror &error);
 };
-

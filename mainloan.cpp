@@ -1,4 +1,4 @@
-#include "/Users/macbookpro/Documents/contracts/mainloan/mainloan.hpp"
+//#include "/Users/macbookpro/Documents/contracts/mainloan/mainloan.hpp"
 
 void mainloan::addborrower(name acc_name, uint64_t b_id, string location,
                     uint64_t b_phone, uint64_t loan_individual,
@@ -85,17 +85,32 @@ void mainloan::getuwr(name acc_name){
   eosio::print("Balance: ", underwriter.balance);
 }
 
+void mainloan::getloan(uint64_t loan_id){
+
+  auto loaninfo = loan_table.get(loan_id);
+  eosio::check(loaninfo.loan_id==loan_id, "Loan ID doesn't exist.");
+
+  eosio::print("loan details :", loaninfo.loan_id);
+  eosio::print("borrower name :", loaninfo.borr_name);
+  eosio::print("borrower name :", loaninfo.uwr_name);
+  eosio::print("lending amount :", loaninfo.lending_amount);
+  eosio::print("Interst rate :", loaninfo.interest_rate);
+  eosio::print("Payment time :", loaninfo.payment_time);
+  eosio::print("emi :", loaninfo.emi);
+  eosio::print("Total amount to be returned", loaninfo.return_value);
+}
+
 void mainloan::defincr(name from, uint64_t loanpm, name to)
 {
         require_auth(from);
-        auto itr = borr_table.get(to.value);
+        auto itr1 = borr_table.get(to.value);
         auto itr2 = uwr_table.find(from.value);
-        eosio::check(itr.acc_name==to, "Borrower doesn't exist.");
+        eosio::check(itr1.acc_name==to, "Borrower doesn't exist.");
         eosio::check(itr2!=uwr_table.end(), "Lender doesn't exist.");
         eosio::check(loanpm>0, "Cannot loan in negatives!");
 
         print("Deferred loan from ", from, " for credit of ", loanpm, " to ", to);
-        itr.credit_amnt += loanpm;
+        itr1.credit_amnt += loanpm;
 }
 
 void mainloan::send(name from, bool check, name to, uint64_t loanpm)
@@ -147,4 +162,4 @@ void mainloan::onanerror(const onerror &error){
 // }
 
 ///namespace eosio
-EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(send))
+EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(getloan)(defincr)(send))
