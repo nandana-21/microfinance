@@ -74,5 +74,31 @@ void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64
   print("Loan Added");
 }
 
+void deferred(name from, const string &message)
+    {
+        require_auth(from);
+        print("Printing deferred ", from, message);
+    }
+
+void send(name from, const string &message, uint64_t delay)
+    {
+        require_auth(from);
+
+        eosio::transaction t{};
+        t.actions.emplace_back(
+            permission_level(from, "active"_n),
+            _self,
+            "deferred"_n,
+            std::make_tuple(from, message));
+
+       t.delay_sec = delay;   // set delay in seconds
+
+       t.send(now(), from /*, false */);
+
+        print("Scheduled with a delay of ", delay);
+    }
+};
+
 ///namespace eosio
 EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower))
+EOSIO_DISPATCH(deferred_trx, (send)(deferred))
