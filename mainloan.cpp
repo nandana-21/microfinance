@@ -1,4 +1,4 @@
-//#include "/Users/macbookpro/Documents/contracts/mainloan/mainloan.hpp"
+#include "/Users/macbookpro/Documents/contracts/mainloan/mainloan.hpp"
 
 void mainloan::addborrower(name acc_name, uint64_t b_id, string location,
                     uint64_t b_phone, uint64_t loan_individual,
@@ -85,7 +85,7 @@ void mainloan::getuwr(name acc_name){
   eosio::print("Balance: ", underwriter.balance);
 }
 
-void mainloan::getloan(uint64_t loan_id){
+void mainloan::getloan(uint64_t loan_id){  //Loan ID to be taken or another key to be created!!
 
   auto loaninfo = loan_table.get(loan_id);
   eosio::check(loaninfo.loan_id==loan_id, "Loan ID doesn't exist.");
