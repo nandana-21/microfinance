@@ -30,14 +30,6 @@
                 {
                     "name": "b_balance",
                     "type": "uint64"
-                },
-                {
-                    "name": "group_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "credit_score",
-                    "type": "uint64"
                 }
             ]
         },
@@ -110,7 +102,7 @@
                     "type": "uint64"
                 },
                 {
-                    "name": "b_balance",
+                    "name": "credit_amnt",
                     "type": "uint64"
                 },
                 {
@@ -120,7 +112,29 @@
             ]
         },
         {
-            "name": "deferred",
+            "name": "deferred_info",
+            "base": "",
+            "fields": [
+                {
+                    "name": "loan_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "uwr_name",
+                    "type": "name"
+                },
+                {
+                    "name": "lending_amount",
+                    "type": "uint64"
+                },
+                {
+                    "name": "borr_name",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "defincr",
             "base": "",
             "fields": [
                 {
@@ -128,8 +142,12 @@
                     "type": "name"
                 },
                 {
-                    "name": "message",
-                    "type": "string"
+                    "name": "loanpm",
+                    "type": "uint64"
+                },
+                {
+                    "name": "to",
+                    "type": "name"
                 }
             ]
         },
@@ -148,12 +166,16 @@
             "base": "",
             "fields": [
                 {
-                    "name": "load_id",
+                    "name": "loan_id",
                     "type": "uint64"
                 },
                 {
                     "name": "uwr_name",
                     "type": "name"
+                },
+                {
+                    "name": "uwr_id",
+                    "type": "uint64"
                 },
                 {
                     "name": "lending_amount",
@@ -184,8 +206,36 @@
                     "type": "uint64"
                 },
                 {
+                    "name": "loan_instl",
+                    "type": "uint64"
+                },
+                {
                     "name": "status",
                     "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "onanerror",
+            "base": "",
+            "fields": [
+                {
+                    "name": "error",
+                    "type": "onerror"
+                }
+            ]
+        },
+        {
+            "name": "onerror",
+            "base": "",
+            "fields": [
+                {
+                    "name": "sender_id",
+                    "type": "uint128"
+                },
+                {
+                    "name": "sent_trx",
+                    "type": "bytes"
                 }
             ]
         },
@@ -198,11 +248,15 @@
                     "type": "name"
                 },
                 {
-                    "name": "message",
-                    "type": "string"
+                    "name": "check",
+                    "type": "bool"
                 },
                 {
-                    "name": "delay",
+                    "name": "to",
+                    "type": "name"
+                },
+                {
+                    "name": "loanpm",
                     "type": "uint64"
                 }
             ]
@@ -243,13 +297,18 @@
             "ricardian_contract": ""
         },
         {
-            "name": "deferred",
-            "type": "deferred",
+            "name": "defincr",
+            "type": "defincr",
             "ricardian_contract": ""
         },
         {
             "name": "getborrower",
             "type": "getborrower",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "onanerror",
+            "type": "onanerror",
             "ricardian_contract": ""
         },
         {
@@ -262,6 +321,13 @@
         {
             "name": "borrower",
             "type": "borrower_info",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "deferred",
+            "type": "deferred_info",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

@@ -2,7 +2,7 @@
 
 void mainloan::addborrower(name acc_name, uint64_t b_id, string location,
                     uint64_t b_phone, uint64_t loan_individual,
-                    uint64_t b_balance, uint64_t group_id, uint64_t credit_score)
+                    uint64_t b_balance)
 {
   print("Adding borrower: ", acc_name);
   require_auth( _self ); //authorization of the contract account
@@ -41,7 +41,7 @@ void mainloan::getborrower(name acc_name){
   eosio::check(borrower.acc_name==acc_name, "Borrower doesn't exist.");
 
   eosio::print("Borrower Details: ", borrower.acc_name);
-  eosio::print(" ID: ", borrower.b_id);
+  eosio::print("ID: ", borrower.b_id);
   eosio::print("Location: ", borrower.location);
   eosio::print("Phone Number: ", borrower.b_phone);
   eosio::print("Loan Individual: ", borrower.loan_individual);
@@ -61,8 +61,9 @@ void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64
   eosio::check(uwr!=uwr_table.end(), "Lender doesn't exist.");
 
   loan_table.emplace(get_self(), [&](auto &l){
-    l.load_id = loan_table.available_primary_key();
+    l.loan_id = loan_table.available_primary_key();
     l.uwr_name = uwr_name;
+    l.uwr_id = uwr->acc_id;
     l.lending_amount = loan_amnt;
     l.borr_name = borr_name;
     l.borr_id = borrower->b_id;
@@ -74,7 +75,7 @@ void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64
   print("Loan Added");
 }
 
-void mainloan::deferred(name from, uint64_t loanpm, name to)
+void mainloan::defincr(name from, uint64_t loanpm, name to)
 {
         require_auth(from);
         auto itr = borr_table.get(to.value);
@@ -96,12 +97,20 @@ void mainloan::send(name from, bool check, name to, uint64_t loanpm)
         t.actions.emplace_back(
             permission_level(from, "active"_n),
             _self,
-            "deferred"_n,
+            "defincr"_n,
             std::make_tuple(from, loanpm, to));
 
        t.delay_sec = 30*24*60*60;   //delay in seconds => 1 month in sec
 
        t.send(now(), from /*, false */);
+
+       // deferred_table.emplace(get_self(), [&](auto &d){
+       //   d.loan_id = deferred_table.available_primary_key();
+       //   d.uwr_name = from;
+       //   d.lending_amount = loanpm;
+       //   d.borr_name = to;
+       //   d.
+       // });
 
         print("Scheduled with a delay of 30 days.");
 }
@@ -109,17 +118,23 @@ void mainloan::send(name from, bool check, name to, uint64_t loanpm)
 void mainloan::onanerror(const onerror &error){
 
         print("Resending Transaction: ", error.sender_id);
-        eosio::transaction dtrx = error.unpack_sent_trx();
-        dtrx.delay_sec = 2;
-        dtrx.send(now(), _self);
+        def_counter++;
+        if (def_counter<=3){
+            eosio::transaction dtrx = error.unpack_sent_trx();
+            dtrx.delay_sec = 2;
+            dtrx.send(now(), _self);
+        }
+        else{
+            print("Txn couldnt take place");
+        }
 }
 
-extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
-  if (code=="eosio"_n.value && action=="onanerror"_n.value){
-    eosio::execute_action(eosio::name(receiver), eosio::name(code),
-      &mainloan::onanerror);
-  }
-}
+// extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
+//   if (code=="eosio"_n.value && action=="onanerror"_n.value){
+//     eosio::execute_action(eosio::name(receiver), eosio::name(code),
+//       &mainloan::onanerror);
+//   }
+// }
 
 ///namespace eosio
-EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(deferred)(send))
+EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(defincr)(send))
