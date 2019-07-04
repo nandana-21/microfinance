@@ -16,7 +16,7 @@ void mainloan::addborrower(name acc_name, uint64_t b_id, string location,
         b.location = location;
         b.b_phone = b_phone;
         b.loan_individual = loan_individual;
-        b.b_balance = b_balance;
+        b.credit_amnt = b_balance;
   });
 }
 
@@ -45,7 +45,7 @@ void mainloan::getborrower(name acc_name){
   eosio::print("Location: ", borrower.location);
   eosio::print("Phone Number: ", borrower.b_phone);
   eosio::print("Loan Individual: ", borrower.loan_individual);
-  eosio::print("Balance: ", borrower.b_balance);
+  eosio::print("Balance: ", borrower.credit_amnt);
   eosio::print("Credit Score: ", borrower.credit_score);
 }
 
@@ -74,30 +74,46 @@ void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64
   print("Loan Added");
 }
 
-void mainloan::deferred(name from, const string &message)
+void mainloan::deferred(name from, uint64_t loanpm, name to)
 {
         require_auth(from);
-        print("Printing deferred ", from, message);
+        auto itr = borr_table.find(to.value);
+        auto itr2 = uwr_table.find(from.value);
+        eosio::check(itr!=borr_table.end(), "Borrower doesn't exist.");
+        eosio::check(itr2!=uwr_table.end(), "Lender doesn't exist.");
+        eosio::check(loanpm>0, "Cannot loan in negatives!");
+
+        print("Deferred loan from ", from, " for credit of ", loanpm, " to ", to);
+        itr->credit_amnt += loanpm;
 }
 
-void mainloan::send(name from, const string &message, uint64_t delay)
+void mainloan::send(name from, bool check, name to, uint64_t loanpm)
 {
         require_auth(from);
+        eosio::check(check==1, "Borrower has not paid last month's return amount.");
 
         eosio::transaction t{};
         t.actions.emplace_back(
             permission_level(from, "active"_n),
             _self,
             "deferred"_n,
-            std::make_tuple(from, message));
+            std::make_tuple(from, loanpm, to));
 
-       t.delay_sec = delay;   // set delay in seconds
+       t.delay_sec = 30*24*60*60;   //delay in seconds => 1 month in sec
 
        t.send(now(), from /*, false */);
 
         print("Scheduled with a delay of ", delay);
 }
 
+void mainloan::onError(onerror &error){
+
+        print("Resending Transaction: ", error.sender_id);
+        eosio::transaction dtxn = error.unpack_sent_txn();
+        dtrx.delay_sec = 2;
+        dtrx.send(now(), _self);
+}
+
 
 ///namespace eosio
-EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(deferred)(send))
+EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(deferred)(send)(apply))

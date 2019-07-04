@@ -20,7 +20,7 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       string location;
       uint64_t b_phone;
       uint64_t loan_individual;
-      uint64_t b_balance;
+      uint64_t credit_amnt;
       uint64_t credit_score=0;
 
       auto primary_key()const {
@@ -95,7 +95,20 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     void addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64_t rate, uint64_t pay_time);
 
     // this action will be called by the deferred transaction
-    void deferred(name from, const string &message);
+    // deferred loan giving after every month
+    [[eosio::action]]
+    void deferred(name from, uint64_t loanpm, name to);
 
+    [[eosio::action]]
     void send(name from, const string &message, uint64_t delay);
+
+    [[eosio::action]]
+    void onError(const onerror &error);
 };
+
+extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
+  if (code=="eosio"_n.value && action=="onerror"_n.value){
+    eosio::execute_action(eosio::name(receiver), eosio::name(code),
+      &deferred_example::onError);
+  }
+}

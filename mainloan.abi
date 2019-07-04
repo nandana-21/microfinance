@@ -120,6 +120,20 @@
             ]
         },
         {
+            "name": "deferred",
+            "base": "",
+            "fields": [
+                {
+                    "name": "from",
+                    "type": "name"
+                },
+                {
+                    "name": "message",
+                    "type": "string"
+                }
+            ]
+        },
+        {
             "name": "getborrower",
             "base": "",
             "fields": [
@@ -176,6 +190,24 @@
             ]
         },
         {
+            "name": "send",
+            "base": "",
+            "fields": [
+                {
+                    "name": "from",
+                    "type": "name"
+                },
+                {
+                    "name": "message",
+                    "type": "string"
+                },
+                {
+                    "name": "delay",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "underwriter_info",
             "base": "",
             "fields": [
@@ -211,8 +243,18 @@
             "ricardian_contract": ""
         },
         {
+            "name": "deferred",
+            "type": "deferred",
+            "ricardian_contract": ""
+        },
+        {
             "name": "getborrower",
             "type": "getborrower",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "send",
+            "type": "send",
             "ricardian_contract": ""
         }
     ],
