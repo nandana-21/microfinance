@@ -93,19 +93,9 @@ class [[eosio::contract]] mainloan : public eosio::contract{
 
     [[eosio::action]]
     void addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64_t rate, uint64_t pay_time);
-};
-
-
-class [[eosio::contract]] deferred_trx : public eosio::contract
-{
-  public:
-    using contract::contract;
 
     // this action will be called by the deferred transaction
     void deferred(name from, const string &message);
-    
+
     void send(name from, const string &message, uint64_t delay);
 };
-
-
-
