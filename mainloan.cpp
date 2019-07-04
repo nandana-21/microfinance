@@ -1,6 +1,4 @@
-//CPP file starts here
-
-include "mainloan.hpp"
+#include "/Users/macbookpro/Documents/contracts/mainloan/mainloan.hpp"
 
 void mainloan::addborrower(name acc_name, uint64_t b_id, string location,
                     uint64_t b_phone, uint64_t loan_individual,

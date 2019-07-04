@@ -9,12 +9,12 @@ Microfinance, also called Microcredit​, is a type of banking service that is p
 
 ## Traditional Microfinance ##
 
-![](traditional_microfinance.jpg)
+![](images/traditional_microfinance.jpg)
 
 ## Modern-day Microfinance ##
 
-![](modernday_microfinance.PNG)
+![](images/modernday_microfinance.PNG)
 
 ## Why Blockchain ##
 
-![](microfinance.png)
+![](images/microfinance.png)
