@@ -25,18 +25,54 @@
                 },
                 {
                     "name": "loan_individual",
-                    "type": "asset"
+                    "type": "uint64"
                 },
                 {
                     "name": "b_balance",
-                    "type": "asset"
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "addloan",
+            "base": "",
+            "fields": [
+                {
+                    "name": "uwr_name",
+                    "type": "name"
                 },
                 {
-                    "name": "group_id",
-                    "type": "checksum256"
+                    "name": "borr_name",
+                    "type": "name"
                 },
                 {
-                    "name": "credit_score",
+                    "name": "loan_amnt",
+                    "type": "uint64"
+                },
+                {
+                    "name": "rate",
+                    "type": "uint64"
+                },
+                {
+                    "name": "pay_time",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "adduwr",
+            "base": "",
+            "fields": [
+                {
+                    "name": "acc_name",
+                    "type": "name"
+                },
+                {
+                    "name": "acc_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "balance",
                     "type": "uint64"
                 }
             ]
@@ -63,15 +99,11 @@
                 },
                 {
                     "name": "loan_individual",
-                    "type": "asset"
+                    "type": "uint64"
                 },
                 {
-                    "name": "b_balance",
-                    "type": "asset"
-                },
-                {
-                    "name": "group_id",
-                    "type": "checksum256"
+                    "name": "credit_amnt",
+                    "type": "uint64"
                 },
                 {
                     "name": "credit_score",
@@ -80,38 +112,72 @@
             ]
         },
         {
-            "name": "group_info",
+            "name": "deferred_info",
             "base": "",
             "fields": [
                 {
-                    "name": "group_id",
+                    "name": "loan_id",
                     "type": "uint64"
                 },
                 {
-                    "name": "total_loan",
-                    "type": "asset"
+                    "name": "uwr_name",
+                    "type": "name"
                 },
                 {
-                    "name": "member_names",
-                    "type": "string[]"
+                    "name": "lending_amount",
+                    "type": "uint64"
+                },
+                {
+                    "name": "borr_name",
+                    "type": "name"
                 }
             ]
         },
         {
-            "name": "lender_info",
+            "name": "defincr",
+            "base": "",
+            "fields": [
+                {
+                    "name": "from",
+                    "type": "name"
+                },
+                {
+                    "name": "loanpm",
+                    "type": "uint64"
+                },
+                {
+                    "name": "to",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "getborrower",
             "base": "",
             "fields": [
                 {
                     "name": "acc_name",
                     "type": "name"
-                },
+                }
+            ]
+        },
+        {
+            "name": "getloan",
+            "base": "",
+            "fields": [
                 {
-                    "name": "acc_id",
+                    "name": "loan_id",
                     "type": "uint64"
-                },
+                }
+            ]
+        },
+        {
+            "name": "getuwr",
+            "base": "",
+            "fields": [
                 {
-                    "name": "balance",
-                    "type": "asset"
+                    "name": "acc_name",
+                    "type": "name"
                 }
             ]
         },
@@ -120,15 +186,27 @@
             "base": "",
             "fields": [
                 {
-                    "name": "acc_name",
+                    "name": "loan_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "uwr_name",
                     "type": "name"
                 },
                 {
-                    "name": "lending_amount",
-                    "type": "asset"
+                    "name": "uwr_id",
+                    "type": "uint64"
                 },
                 {
-                    "name": "lent_group_id",
+                    "name": "lending_amount",
+                    "type": "uint64"
+                },
+                {
+                    "name": "borr_name",
+                    "type": "name"
+                },
+                {
+                    "name": "borr_id",
                     "type": "uint64"
                 },
                 {
@@ -140,26 +218,66 @@
                     "type": "uint64"
                 },
                 {
-                    "name": "status",
+                    "name": "emi",
                     "type": "uint64"
+                },
+                {
+                    "name": "return_value",
+                    "type": "uint64"
+                },
+                {
+                    "name": "loan_instl",
+                    "type": "uint64"
+                },
+                {
+                    "name": "status",
+                    "type": "bool"
                 }
             ]
         },
         {
-            "name": "relayer_info",
+            "name": "onanerror",
             "base": "",
             "fields": [
                 {
-                    "name": "acc_name",
+                    "name": "error",
+                    "type": "onerror"
+                }
+            ]
+        },
+        {
+            "name": "onerror",
+            "base": "",
+            "fields": [
+                {
+                    "name": "sender_id",
+                    "type": "uint128"
+                },
+                {
+                    "name": "sent_trx",
+                    "type": "bytes"
+                }
+            ]
+        },
+        {
+            "name": "send",
+            "base": "",
+            "fields": [
+                {
+                    "name": "from",
                     "type": "name"
                 },
                 {
-                    "name": "acc_id",
-                    "type": "uint64"
+                    "name": "check",
+                    "type": "bool"
                 },
                 {
-                    "name": "balance",
-                    "type": "asset"
+                    "name": "to",
+                    "type": "name"
+                },
+                {
+                    "name": "loanpm",
+                    "type": "uint64"
                 }
             ]
         },
@@ -177,10 +295,6 @@
                 },
                 {
                     "name": "balance",
-                    "type": "asset"
-                },
-                {
-                    "name": "value_score",
                     "type": "uint64"
                 }
             ]
@@ -190,6 +304,46 @@
         {
             "name": "addborrower",
             "type": "addborrower",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "addloan",
+            "type": "addloan",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "adduwr",
+            "type": "adduwr",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "defincr",
+            "type": "defincr",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "getborrower",
+            "type": "getborrower",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "getloan",
+            "type": "getloan",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "getuwr",
+            "type": "getuwr",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "onanerror",
+            "type": "onanerror",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "send",
+            "type": "send",
             "ricardian_contract": ""
         }
     ],
@@ -202,15 +356,8 @@
             "key_types": []
         },
         {
-            "name": "group",
-            "type": "group_info",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "lender",
-            "type": "lender_info",
+            "name": "deferred",
+            "type": "deferred_info",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
@@ -218,13 +365,6 @@
         {
             "name": "loan",
             "type": "loan_info",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "relayer",
-            "type": "relayer_info",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

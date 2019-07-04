@@ -1,118 +1,97 @@
+//HPP file here
 #include <eosiolib/asset.hpp>
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/print.hpp>
+#include <eosiolib/transaction.hpp>
+#include <eosiolib/crypto.h>
 #include <string>
+#include <vector>
+#include <cmath>
 
 using namespace eosio;
 using namespace std;
 
 class [[eosio::contract]] mainloan : public eosio::contract{
   private:
-    //table definitions
 
     struct [[eosio::table]] borrower_info{
       name acc_name;
-      uint64_t b_id; //hash
-      string location; //geohash or coordinates
+      uint64_t b_id;
+      string location;
       uint64_t b_phone;
-      //uint64_t group_type;
-      asset loan_individual;
-      asset b_balance; //borrower account balance
-      checksum256 group_id; //hash function
-      uint64_t credit_score;
+      uint64_t loan_individual;
+      uint64_t credit_amnt;
+      uint64_t credit_score=0;
 
       auto primary_key()const {
         return acc_name.value;
       }
-      checksum256 get_group_id() const{
-        return group_id;
-      }
     };
-
-    struct [[eosio::table]] group_info{ //group leader should init this table ;;;;; primary key=group id
-      uint64_t group_id;
-      asset total_loan; //total loan of group
-      vector <string> member_names; //name is ended with '/' //hash of this is the group_id //CHANGE: make array //DONE
-
-      uint64_t primary_key() const{
-        return group_id;
-      }
-    };
-    /*
-    TABLE shg_savings{ //NOT CONSIDERING
-      uint64_t group_id;
-      uint64_t saving_amnt;
-
-      uint64_t primary_key() const{
-        return group_id;
-      }
-    };*/
 
     struct [[eosio::table]] underwriter_info{
       name acc_name;
       uint64_t acc_id;
-      asset balance;
-      uint64_t value_score;
-
+      uint64_t balance;
 
       auto primary_key() const{
-        return acc_name;
+        return acc_name.value;
       }
     };
 
-    struct [[eosio::table]] lender_info{
-      name acc_name;
-      uint64_t acc_id;
-      asset balance;
-
-      auto primary_key() const{
-        return acc_name;
-      }
-    };
-
-    struct [[eosio::table]] relayer_info{
-      name acc_name;
-      uint64_t acc_id;
-      asset balance;
-
-      auto primary_key() const{
-        return acc_name;
-      }
-    };
-
-    struct [[eosio::table]] loan_info{ //loan id needed to put
-      name acc_name;
-      asset lending_amount;
-      uint64_t lent_group_id;
+    struct [[eosio::table]] loan_info{
+      uint64_t loan_id;
+      name uwr_name;
+      uint64_t uwr_id;
+      uint64_t lending_amount;
+      name borr_name;
+      uint64_t borr_id;
       uint64_t interest_rate;
       uint64_t payment_time;
-      uint64_t status=0; //0-incomplete 1-complete
+      uint64_t emi;
+      uint64_t return_value;
+      uint64_t loan_instl = 1;
+      //date ka bhi daalna hai
+      bool status=0;
 
-      auto primary_key() const{
-        return acc_name;
+      uint64_t primary_key() const{
+        return loan_id;
+      }
+      auto get_uwr_name() const{
+        return uwr_name.value;
+      }
+      uint64_t get_uwr_id() const{
+        return uwr_id;
+      }
+      auto get_borr_name() const{
+        return borr_name.value;
+      }
+      uint64_t get_borr_id() const{
+        return borr_id;
       }
     };
 
-    //typedefs
-    typedef eosio::multi_index<"borrower"_n, borrower_info,
-                                eosio::indexed_by<"bygroupid"_n, const_mem_fun<borrower_info, checksum256, &borrower_info::get_group_id>>> borrower; //check
-    typedef eosio::multi_index<"group"_n, group_info> group;
-    //typedef eosio::multi_index<"shg"_n, shg_savings> shg; //NOT CONSIDERING
+    struct [[eosio::table]] deferred_info{
+      uint64_t loan_id;
+      name uwr_name;
+      uint64_t lending_amount;
+      name borr_name;
+
+      uint64_t primary_key() const{
+        return loan_id;
+      }
+    };
+
+    typedef eosio::multi_index<"borrower"_n, borrower_info> borrower;
     typedef eosio::multi_index<"underwriter"_n, underwriter_info> underwriter;
-    typedef eosio::multi_index<"relayer"_n, relayer_info> relayer;
-    typedef eosio::multi_index<"lender"_n, lender_info> lender;
     typedef eosio::multi_index<"loan"_n, loan_info> loan;
+    typedef eosio::multi_index<"deferred"_n, deferred_info> deferred;
 
-    //init
     borrower borr_table;
-    group group_table;
-    //shg shg_table;
     underwriter uwr_table;
-    relayer relayer_table;
-    lender lender_table;
     loan loan_table;
+    deferred deferred_table;
 
-
+    uint64_t def_counter = 0;
 
   public:
     using contract::contract;
@@ -120,19 +99,40 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     mainloan(eosio::name receiver, eosio::name code, datastream<const char*> ds):
               eosio::contract(receiver, code, ds),
               borr_table(receiver, code.value),
-              group_table(receiver, code.value),
               uwr_table(receiver, code.value),
-              relayer_table(receiver, code.value),
-              lender_table(receiver, code.value),
-              loan_table(receiver, code.value){
+              loan_table(receiver, code.value),
+              deferred_table(receiver, code.value){}
 
-
-    }
 
     [[eosio::action]]
     void addborrower(name acc_name, uint64_t b_id, string location,
-                        uint64_t b_phone, asset loan_individual,
-                        asset b_balance, checksum256 group_id, uint64_t credit_score);
+                        uint64_t b_phone, uint64_t loan_individual,
+                        uint64_t b_balance);
 
 
+    [[eosio::action]]
+    void adduwr(name acc_name, uint64_t acc_id, uint64_t balance);
+
+    [[eosio::action]]
+    void addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64_t rate, uint64_t pay_time);
+    
+    [[eosio::action]]
+    void getborrower(name acc_name);
+
+    [[eosio::action]]
+    void getuwr(name acc_name);
+
+    [[eosio::action]]
+    void getloan(uint64_t loan_id);
+
+    // this action will be called by the deferred transaction
+    // deferred loan giving after every month
+    [[eosio::action]]
+    void defincr(name from, uint64_t loanpm, name to);
+
+    [[eosio::action]]
+    void send(name from, bool check, name to, uint64_t loanpm);
+
+    [[eosio::action]]
+    void onanerror(const onerror &error);
 };
