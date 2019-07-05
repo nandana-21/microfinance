@@ -114,9 +114,9 @@ void mainloan::defincr(name from, uint64_t loanpm, name to)
         getuwr(from);
         eosio::print("Deferred loan from ", from, " for credit of ", loanpm, " to ", to);
         itr.credit_amnt += loanpm;
+}
 
-void mainloan::send(name from, bool check_stat, name to, uint64_t loanpm)
-{
+void mainloan::send(name from, bool check_stat, name to, uint64_t loanpm){
         require_auth(from);
         eosio::check(check_stat==1, "Borrower has not paid last month's return amount.");
 
@@ -156,14 +156,14 @@ void mainloan::onanerror(const onerror &error){
         }
 }
 
-extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
-  if (code=="eosio"_n.value && action=="onerror"_n.value){
-    eosio::execute_action(eosio::name(receiver), eosio::name(code),
-      &mainloan::onanerror);
-  }
-  else{
-  }
-}
+// extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
+//   if (code=="eosio"_n.value && action=="onerror"_n.value){
+//     eosio::execute_action(eosio::name(receiver), eosio::name(code),
+//       &mainloan::onanerror);
+//   }
+//   // else{
+//   // }
+// }
 
-// ///namespace eosio
-// EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(send)(onanerror))
+///namespace eosio
+EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(send)(onanerror))

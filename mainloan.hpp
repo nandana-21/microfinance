@@ -134,8 +134,5 @@ class [[eosio::contract]] mainloan : public eosio::contract{
 
     [[eosio::action]]
     void onanerror(const onerror &error);
-<<<<<<< HEAD
+
 };
-=======
-};
->>>>>>> cb3a8b2ba420b71d95a9e0a72d37b1799c8ee28b
