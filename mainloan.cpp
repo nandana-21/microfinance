@@ -87,6 +87,21 @@ void mainloan::getuwr(name acc_name){
   eosio::print("Balance: ", underwriter.balance);
 }
 
+void mainloan::getloan(uint64_t loan_id){  //Loan ID to be taken or another key to be created!!
+
+  auto loaninfo = loan_table.get(loan_id);
+  eosio::check(loaninfo.loan_id==loan_id, "Loan ID doesn't exist.");
+
+  eosio::print("loan details :", loaninfo.loan_id);
+  eosio::print("borrower name :", loaninfo.borr_name);
+  eosio::print("borrower name :", loaninfo.uwr_name);
+  eosio::print("lending amount :", loaninfo.lending_amount);
+  eosio::print("Interst rate :", loaninfo.interest_rate);
+  eosio::print("Payment time :", loaninfo.payment_time);
+  eosio::print("emi :", loaninfo.emi);
+  eosio::print("Total amount to be returned", loaninfo.return_value);
+}
+
 void mainloan::defincr(name from, uint64_t loanpm, name to)
 {
         eosio::print("Hello123");
@@ -99,7 +114,6 @@ void mainloan::defincr(name from, uint64_t loanpm, name to)
         getuwr(from);
         eosio::print("Deferred loan from ", from, " for credit of ", loanpm, " to ", to);
         itr.credit_amnt += loanpm;
-}
 
 void mainloan::send(name from, bool check_stat, name to, uint64_t loanpm)
 {
