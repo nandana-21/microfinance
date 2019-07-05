@@ -165,7 +165,7 @@ extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
   }
   else{
     switch(action){
-      EOSIO_DISPATCH_HELPER(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(send))
+      EOSIO_DISPATCH_HELPER(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(send)(updatescore))
     }
     eosio_exit(0);
   }
