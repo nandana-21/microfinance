@@ -105,16 +105,20 @@ void mainloan::getloan(uint64_t loan_id){  //Loan ID to be taken or another key 
 
 void mainloan::defincr(name from, uint64_t loanpm, name to)
 {
-        eosio::print("Hello123");
-        //require_auth(from);
-        auto itr = borr_table.get(to.value);
+        //eosio::print("Hello123");
+        require_auth(from);
+
+        auto itr = borr_table.find(to.value);
+        borr_table.modify(itr, from, [&](auto& o){    //record, payer, new changed record
+          o.credit_amnt += loanpm;
+        });
         //auto itr2 = uwr_table.find(from.value);
         //eosio::check(itr.acc_name==to, "Borrower doesn't exist.");
         //eosio::check(itr2!=uwr_table.end(), "Lender doesn't exist.");
         //eosio::check(loanpm>0, "Cannot loan in negatives!");
-        getuwr(from);
+        //getuwr(from);
         eosio::print("Deferred loan from ", from, " for credit of ", loanpm, " to ", to);
-        itr.credit_amnt += loanpm;
+        //itr.credit_amnt += loanpm;
 }
 
 void mainloan::send(name from, bool check_stat, name to, uint64_t loanpm){
@@ -122,16 +126,18 @@ void mainloan::send(name from, bool check_stat, name to, uint64_t loanpm){
         eosio::check(check_stat==1, "Borrower has not paid last month's return amount.");
 
         eosio::transaction t{};
+        eosio::print("  empty txn created.    ");
         t.actions.emplace_back(
             permission_level(from, "active"_n),
             _self,
             "defincr"_n,
             std::make_tuple(from, loanpm, to));
+        eosio::print("  action inserted in txn w delay set.   ");
 
        t.delay_sec = 5;//30*24*60*60;   //delay in seconds => 1 month in sec
-
-       t.send(now(), from /*, false */);
-
+       eosio::print(" delay set.    ");
+       t.send(_self.value, from /*, false */);
+       eosio::print(" tnx sent.   ");
        // deferred_table.emplace(get_self(), [&](auto &d){
        //   d.loan_id = deferred_table.available_primary_key();
        //   d.uwr_name = from;
@@ -140,7 +146,7 @@ void mainloan::send(name from, bool check_stat, name to, uint64_t loanpm){
        //   d.
        // });
 
-        print("Scheduled with a delay of 30 days.");
+        eosio::print("Scheduled with a delay of 30 days.");
 }
 
 void mainloan::onanerror(const onerror &error){
@@ -159,12 +165,15 @@ void mainloan::onanerror(const onerror &error){
 
 extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
   if (code=="eosio"_n.value && action=="onerror"_n.value){
+    print("     Hello error came.    ");
     eosio::execute_action(eosio::name(receiver), eosio::name(code),
       &mainloan::onanerror);
+      return;
   }
   else{
     switch(action){
-      EOSIO_DISPATCH_HELPER(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(send))
+      print("     normal EOSIO_DISPATCH.      ");
+      EOSIO_DISPATCH_HELPER(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(send)(getloan))
     }
     eosio_exit(0);
   }
