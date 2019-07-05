@@ -298,6 +298,32 @@
                     "type": "uint64"
                 }
             ]
+        },
+        {
+            "name": "updatescore",
+            "base": "",
+            "fields": [
+                {
+                    "name": "borr_name",
+                    "type": "name"
+                },
+                {
+                    "name": "credit_score",
+                    "type": "uint64"
+                },
+                {
+                    "name": "status",
+                    "type": "uint64"
+                },
+                {
+                    "name": "loan_instl",
+                    "type": "uint64"
+                },
+                {
+                    "name": "loan_individual",
+                    "type": "uint64"
+                }
+            ]
         }
     ],
     "actions": [
@@ -344,6 +370,11 @@
         {
             "name": "send",
             "type": "send",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "updatescore",
+            "type": "updatescore",
             "ricardian_contract": ""
         }
     ],

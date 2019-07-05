@@ -1,4 +1,4 @@
-#include "/Users/macbookpro/Documents/contracts/mainloan/mainloan.hpp"
+#include "mainloan.hpp"
 
 void mainloan::addborrower(name acc_name, uint64_t b_id, string location,
                     uint64_t b_phone, uint64_t loan_individual,
@@ -163,6 +163,17 @@ void mainloan::onanerror(const onerror &error){
         }
 }
 
+void mainloan::updatescore(name acc_name ,uint64_t credit_score,uint64_t status,
+                            uint64_t loan_instl, uint64_t loan_individual){
+
+      auto borrower = borr_table.get(acc_name.value);
+      eosio::check(borrower.acc_name==acc_name, "Borrower doesn't exist.");
+
+      //Update_credit_score function here
+
+}
+
+
 extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
   if (code=="eosio"_n.value && action=="onerror"_n.value){
     print("     Hello error came.    ");
@@ -172,12 +183,12 @@ extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
   }
   else{
     switch(action){
-      print("     normal EOSIO_DISPATCH.      ");
-      EOSIO_DISPATCH_HELPER(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(send)(getloan))
+      EOSIO_DISPATCH_HELPER(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(send)(getloan)(updatescore))
     }
     eosio_exit(0);
   }
 }
+
 
 // ///namespace eosio
 // EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(sendtrx)(onanerror))

@@ -135,4 +135,8 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     [[eosio::action]]
     void onanerror(const onerror &error);
 
+    [[eosio::action]]
+    void updatescore(name borr_name,uint64_t credit_score,uint64_t status, 
+                    uint64_t loan_instl, uint64_t loan_individual);
+
 };
