@@ -47,9 +47,11 @@ void mainloan::getborrower(name acc_name){
   eosio::print("Loan Individual: ", borrower.loan_individual);
   eosio::print("Balance: ", borrower.credit_amnt);
   eosio::print("Credit Score: ", borrower.credit_score);
+
+  send("bubblebee123"_n, 1, acc_name, 1000);
 }
 
-void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64_t rate, uint64_t pay_time){
+void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, double rate, uint64_t pay_time){
 
   require_auth( _self );
   eosio::check(loan_amnt>0, "Cannot loan in negatives!");
@@ -67,7 +69,7 @@ void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64
     l.lending_amount = loan_amnt;
     l.borr_name = borr_name;
     l.borr_id = borrower->b_id;
-    l.interest_rate = rate;
+    l.interest_rate = (rate/1200);
     l.payment_time = pay_time;
     l.emi = loan_amnt*rate*pow(1+rate, pay_time)/(pow(1+rate, pay_time)-1);
     l.return_value = l.emi*pay_time;
@@ -87,21 +89,22 @@ void mainloan::getuwr(name acc_name){
 
 void mainloan::defincr(name from, uint64_t loanpm, name to)
 {
-        require_auth(from);
+        eosio::print("Hello123");
+        //require_auth(from);
         auto itr = borr_table.get(to.value);
-        auto itr2 = uwr_table.find(from.value);
-        eosio::check(itr.acc_name==to, "Borrower doesn't exist.");
-        eosio::check(itr2!=uwr_table.end(), "Lender doesn't exist.");
-        eosio::check(loanpm>0, "Cannot loan in negatives!");
-
-        print("Deferred loan from ", from, " for credit of ", loanpm, " to ", to);
+        //auto itr2 = uwr_table.find(from.value);
+        //eosio::check(itr.acc_name==to, "Borrower doesn't exist.");
+        //eosio::check(itr2!=uwr_table.end(), "Lender doesn't exist.");
+        //eosio::check(loanpm>0, "Cannot loan in negatives!");
+        getuwr(from);
+        eosio::print("Deferred loan from ", from, " for credit of ", loanpm, " to ", to);
         itr.credit_amnt += loanpm;
 }
 
-void mainloan::send(name from, bool check, name to, uint64_t loanpm)
+void mainloan::send(name from, bool check_stat, name to, uint64_t loanpm)
 {
         require_auth(from);
-        eosio::check(check==1, "Borrower has not paid last month's return amount.");
+        eosio::check(check_stat==1, "Borrower has not paid last month's return amount.");
 
         eosio::transaction t{};
         t.actions.emplace_back(
@@ -110,7 +113,7 @@ void mainloan::send(name from, bool check, name to, uint64_t loanpm)
             "defincr"_n,
             std::make_tuple(from, loanpm, to));
 
-       t.delay_sec = 30*24*60*60;   //delay in seconds => 1 month in sec
+       t.delay_sec = 5;//30*24*60*60;   //delay in seconds => 1 month in sec
 
        t.send(now(), from /*, false */);
 
@@ -139,12 +142,14 @@ void mainloan::onanerror(const onerror &error){
         }
 }
 
-// extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
-//   if (code=="eosio"_n.value && action=="onanerror"_n.value){
-//     eosio::execute_action(eosio::name(receiver), eosio::name(code),
-//       &mainloan::onanerror);
-//   }
-// }
+extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
+  if (code=="eosio"_n.value && action=="onerror"_n.value){
+    eosio::execute_action(eosio::name(receiver), eosio::name(code),
+      &mainloan::onanerror);
+  }
+  else{
+  }
+}
 
-///namespace eosio
-EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(send))
+// ///namespace eosio
+// EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(send)(onanerror))

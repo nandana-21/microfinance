@@ -51,7 +51,7 @@
                 },
                 {
                     "name": "rate",
-                    "type": "uint64"
+                    "type": "float64"
                 },
                 {
                     "name": "pay_time",
@@ -201,7 +201,7 @@
                 },
                 {
                     "name": "interest_rate",
-                    "type": "uint64"
+                    "type": "float64"
                 },
                 {
                     "name": "payment_time",
@@ -209,11 +209,11 @@
                 },
                 {
                     "name": "emi",
-                    "type": "uint64"
+                    "type": "float64"
                 },
                 {
                     "name": "return_value",
-                    "type": "uint64"
+                    "type": "float64"
                 },
                 {
                     "name": "loan_instl",

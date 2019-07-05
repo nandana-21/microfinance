@@ -45,10 +45,10 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       uint64_t lending_amount;
       name borr_name;
       uint64_t borr_id;
-      uint64_t interest_rate;
+      double interest_rate;
       uint64_t payment_time;
-      uint64_t emi;
-      uint64_t return_value;
+      double emi;
+      double return_value;
       uint64_t loan_instl = 1;
       //date ka bhi daalna hai
       bool status=0;
@@ -109,13 +109,12 @@ class [[eosio::contract]] mainloan : public eosio::contract{
                         uint64_t b_phone, uint64_t loan_individual,
                         uint64_t b_balance);
 
-
     [[eosio::action]]
     void adduwr(name acc_name, uint64_t acc_id, uint64_t balance);
 
     [[eosio::action]]
-    void addloan(name uwr_name, name borr_name, uint64_t loan_amnt, uint64_t rate, uint64_t pay_time);
-    
+    void addloan(name uwr_name, name borr_name, uint64_t loan_amnt, double rate, uint64_t pay_time);
+
     [[eosio::action]]
     void getborrower(name acc_name);
 
@@ -136,4 +135,3 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     [[eosio::action]]
     void onanerror(const onerror &error);
 };
-
