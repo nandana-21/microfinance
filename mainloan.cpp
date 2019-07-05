@@ -62,6 +62,7 @@ void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, double
   eosio::check(borrower!=borr_table.end(), "Borrower doesn't exist.");
   eosio::check(uwr!=uwr_table.end(), "Lender doesn't exist.");
 
+  rate /= 1200;
   loan_table.emplace(get_self(), [&](auto &l){
     l.loan_id = loan_table.available_primary_key();
     l.uwr_name = uwr_name;
@@ -69,7 +70,7 @@ void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, double
     l.lending_amount = loan_amnt;
     l.borr_name = borr_name;
     l.borr_id = borrower->b_id;
-    l.interest_rate = (rate/1200);
+    l.interest_rate = rate;
     l.payment_time = pay_time;
     l.emi = loan_amnt*rate*pow(1+rate, pay_time)/(pow(1+rate, pay_time)-1);
     l.return_value = l.emi*pay_time;
@@ -156,14 +157,18 @@ void mainloan::onanerror(const onerror &error){
         }
 }
 
-// extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
-//   if (code=="eosio"_n.value && action=="onerror"_n.value){
-//     eosio::execute_action(eosio::name(receiver), eosio::name(code),
-//       &mainloan::onanerror);
-//   }
-//   // else{
-//   // }
-// }
+extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
+  if (code=="eosio"_n.value && action=="onerror"_n.value){
+    eosio::execute_action(eosio::name(receiver), eosio::name(code),
+      &mainloan::onanerror);
+  }
+  else{
+    switch(action){
+      EOSIO_DISPATCH_HELPER(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(send))
+    }
+    eosio_exit(0);
+  }
+}
 
-///namespace eosio
-EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(send)(onanerror))
+// ///namespace eosio
+// EOSIO_DISPATCH(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(sendtrx)(onanerror))
