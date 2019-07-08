@@ -74,7 +74,7 @@ void mainloan::addinstl(uint64_t loan_id, uint64_t disbursal_time, uint64_t paid
 
   schedule_table.emplace(get_self(), [&](auto &s){
     s.loan_id = loan_id;
-    s.installment_num = s.installment_num++;
+    s.installment_num++;
     s.disbursal_time = disbursal_time;
     s.total_lent_amnt = itr->lending_amount;
     s.annual_interest = itr->interest_rate;
@@ -83,7 +83,7 @@ void mainloan::addinstl(uint64_t loan_id, uint64_t disbursal_time, uint64_t paid
     s.paid_time = paid_time;
     s.days = (paid_time-disbursal_time)/(3600000*365);
     (s.installment_num==1? s.remaining_amnt=(s.total_lent_amnt)-(s.instl_paid) : s.remaining_amnt-= s.instl_paid);
-    s.ipd = (s.annual_interest)/100*(1/365);
+    s.ipd = (s.annual_interest)/(100*365);
     s.interest_amnt = (s.ipd)*(s.days)*(s.remaining_amnt);
     s.principal_amnt = (s.instl_paid)-(s.interest_amnt);
   });
