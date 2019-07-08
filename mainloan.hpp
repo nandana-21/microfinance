@@ -4,6 +4,8 @@
 #include <eosiolib/print.hpp>
 #include <eosiolib/transaction.hpp>
 #include <eosiolib/crypto.h>
+#include <eosiolib/time.hpp>
+#include <eosiolib/system.h>
 #include <string>
 #include <vector>
 #include <cmath>
@@ -49,8 +51,9 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       uint64_t payment_time;
       double emi;
       double return_value;
+      bool type; //0-normal loan; 1-installment loan
       uint64_t loan_instl = 1;
-      //date ka bhi daalna hai
+      time_point_sec time_stmp;   //date ka bhi daalna hai
       bool status=0;
 
       uint64_t primary_key() const{
@@ -81,9 +84,20 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       }
     };
 
+    // cant pay for a certain time
+    // installments are paid every week
+    //
+    //
+    // struct [[eosio::table]] schedule_info{
+    //
+    // }
+
     typedef eosio::multi_index<"borrower"_n, borrower_info> borrower;
     typedef eosio::multi_index<"underwriter"_n, underwriter_info> underwriter;
-    typedef eosio::multi_index<"loan"_n, loan_info> loan;
+    typedef eosio::multi_index<"loan"_n, loan_info,
+                                indexed_by<"byuwr"_n, const_mem_fun<loan_info, uint64_t, &loan_info::get_uwr_id>>,
+                                indexed_by<"byborr"_n, const_mem_fun<loan_info, uint64_t, &loan_info::get_borr_id>>
+                              > loan;
     typedef eosio::multi_index<"deferred"_n, deferred_info> deferred;
 
     borrower borr_table;
@@ -113,7 +127,8 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     void adduwr(name acc_name, uint64_t acc_id, uint64_t balance);
 
     [[eosio::action]]
-    void addloan(name uwr_name, name borr_name, uint64_t loan_amnt, double rate, uint64_t pay_time);
+    void addloan(name uwr_name, name borr_name, uint64_t loan_amnt, double rate, uint64_t pay_time,
+                  uint64_t time_stmp, bool type);
 
     [[eosio::action]]
     void getborrower(name acc_name);
@@ -127,16 +142,19 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     // this action will be called by the deferred transaction
     // deferred loan giving after every month
     [[eosio::action]]
-    void defincr(name from, uint64_t loanpm, name to);
+    void defincr(name from, uint64_t loanpm, name to, uint64_t loan_id);
 
     [[eosio::action]]
-    void send(name from, bool check, name to, uint64_t loanpm);
+    void send(name from, bool check, name to, uint64_t loanpm, uint64_t loan_id);
 
     [[eosio::action]]
     void onanerror(const onerror &error);
 
     [[eosio::action]]
-    void updatescore(name borr_name,uint64_t credit_score,uint64_t status, 
+    void updatescore(name borr_name,uint64_t credit_score,uint64_t status,
                     uint64_t loan_instl, uint64_t loan_individual);
+
+    // [[eosio::action]]
+    // void schedule();
 
 };

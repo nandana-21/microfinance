@@ -1,4 +1,4 @@
-#include "mainloan.hpp"
+#include "/Users/macbookpro/Documents/contracts/mainloan/mainloan.hpp"
 
 void mainloan::addborrower(name acc_name, uint64_t b_id, string location,
                     uint64_t b_phone, uint64_t loan_individual,
@@ -48,10 +48,10 @@ void mainloan::getborrower(name acc_name){
   eosio::print("Balance: ", borrower.credit_amnt);
   eosio::print("Credit Score: ", borrower.credit_score);
 
-  send("bubblebee123"_n, 1, acc_name, 1000);
+  send("bubblebee123"_n, 1, acc_name, 1000, 1);
 }
 
-void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, double rate, uint64_t pay_time){
+void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, double rate, uint64_t pay_time, uint64_t time_stmp=now(), bool type=0){
 
   require_auth( _self );
   eosio::check(loan_amnt>0, "Cannot loan in negatives!");
@@ -62,7 +62,6 @@ void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, double
   eosio::check(borrower!=borr_table.end(), "Borrower doesn't exist.");
   eosio::check(uwr!=uwr_table.end(), "Lender doesn't exist.");
 
-  rate /= 1200;
   loan_table.emplace(get_self(), [&](auto &l){
     l.loan_id = loan_table.available_primary_key();
     l.uwr_name = uwr_name;
@@ -72,8 +71,11 @@ void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, double
     l.borr_id = borrower->b_id;
     l.interest_rate = rate;
     l.payment_time = pay_time;
+    rate /= 1200;
     l.emi = loan_amnt*rate*pow(1+rate, pay_time)/(pow(1+rate, pay_time)-1);
     l.return_value = l.emi*pay_time;
+    l.time_stmp = time_point_sec(time_stmp);
+    l.type = type;
   });
   print("Loan Added");
 }
@@ -100,28 +102,29 @@ void mainloan::getloan(uint64_t loan_id){  //Loan ID to be taken or another key 
   eosio::print("Interst rate :", loaninfo.interest_rate);
   eosio::print("Payment time :", loaninfo.payment_time);
   eosio::print("emi :", loaninfo.emi);
+  //eosio::print("Time stamp: ", std::to_string(loaninfo.time_stmp));
   eosio::print("Total amount to be returned", loaninfo.return_value);
 }
 
-void mainloan::defincr(name from, uint64_t loanpm, name to)
+void mainloan::defincr(name from, uint64_t loanpm, name to, uint64_t loan_id)
 {
         //eosio::print("Hello123");
         require_auth(from);
 
         auto itr = borr_table.find(to.value);
+        //auto itr2 = uwr_table.find(from.value);
         borr_table.modify(itr, from, [&](auto& o){    //record, payer, new changed record
           o.credit_amnt += loanpm;
         });
-        //auto itr2 = uwr_table.find(from.value);
-        //eosio::check(itr.acc_name==to, "Borrower doesn't exist.");
-        //eosio::check(itr2!=uwr_table.end(), "Lender doesn't exist.");
-        //eosio::check(loanpm>0, "Cannot loan in negatives!");
-        //getuwr(from);
+        auto itr3 = loan_table.find(loan_id);
+        addloan(from, to, itr3->lending_amount, itr3->interest_rate, itr3->payment_time, now(), 1);
+        loan_table.modify(itr3, from, [&](auto& o){
+          o.loan_instl += 1;
+        });
         eosio::print("Deferred loan from ", from, " for credit of ", loanpm, " to ", to);
-        //itr.credit_amnt += loanpm;
 }
 
-void mainloan::send(name from, bool check_stat, name to, uint64_t loanpm){
+void mainloan::send(name from, bool check_stat, name to, uint64_t loanpm, uint64_t loan_id){
         require_auth(from);
         eosio::check(check_stat==1, "Borrower has not paid last month's return amount.");
 
@@ -131,7 +134,7 @@ void mainloan::send(name from, bool check_stat, name to, uint64_t loanpm){
             permission_level(from, "active"_n),
             _self,
             "defincr"_n,
-            std::make_tuple(from, loanpm, to));
+            std::make_tuple(from, loanpm, to, loan_id));
         eosio::print("  action inserted in txn w delay set.   ");
 
        t.delay_sec = 5;//30*24*60*60;   //delay in seconds => 1 month in sec
