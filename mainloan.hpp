@@ -44,16 +44,16 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       uint64_t loan_id;
       name uwr_name;
       uint64_t uwr_id;
-      uint64_t lending_amount;
+      double lending_amount;
       name borr_name;
       uint64_t borr_id;
-      double interest_rate;
-      uint64_t payment_time;
-      double emi;
-      double return_value;
-      bool type; //0-normal loan; 1-installment loan
+      double interest_rate;     //annual
+      uint64_t payment_time = 30;    //total time ~ month
+      double emi;               //not required?
+      double return_value;      //not required?
+      //bool type; //0-normal loan; 1-installment loan
       uint64_t loan_instl = 1;
-      time_point_sec time_stmp;   //date ka bhi daalna hai
+      uint64_t time_stmp;   //date ka bhi daalna hai
       bool status=0;
 
       uint64_t primary_key() const{
@@ -73,24 +73,25 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       }
     };
 
-    struct [[eosio::table]] deferred_info{
+    struct [[eosio::table]] schedule_info{
       uint64_t loan_id;
-      name uwr_name;
-      uint64_t lending_amount;
-      name borr_name;
+      uint64_t installment_num=0;
+      double total_lent_amnt;
+      uint64_t disbursal_time;
+      double annual_interest;
+      double total_time;
+      uint64_t paid_time;
+      double instl_paid=0;
+      uint64_t days;        //since last repayment
+      double remaining_amnt;
+      double ipd;
+      double interest_amnt=0;
+      double principal_amnt=0;
 
       uint64_t primary_key() const{
         return loan_id;
       }
     };
-
-    // cant pay for a certain time
-    // installments are paid every week
-    //
-    //
-    // struct [[eosio::table]] schedule_info{
-    //
-    // }
 
     typedef eosio::multi_index<"borrower"_n, borrower_info> borrower;
     typedef eosio::multi_index<"underwriter"_n, underwriter_info> underwriter;
@@ -98,12 +99,26 @@ class [[eosio::contract]] mainloan : public eosio::contract{
                                 indexed_by<"byuwr"_n, const_mem_fun<loan_info, uint64_t, &loan_info::get_uwr_id>>,
                                 indexed_by<"byborr"_n, const_mem_fun<loan_info, uint64_t, &loan_info::get_borr_id>>
                               > loan;
+    typedef eosio::multi_index<"schedule"_n, schedule_info> schedule;
+
+    struct [[eosio::table]] deferred_info{
+      uint64_t loan_id;
+      name uwr_name;
+      name borr_name;
+      //schedule schedule_table;
+
+      uint64_t primary_key() const{
+        return loan_id;
+      }
+    };
     typedef eosio::multi_index<"deferred"_n, deferred_info> deferred;
+
 
     borrower borr_table;
     underwriter uwr_table;
     loan loan_table;
     deferred deferred_table;
+    schedule schedule_table;
 
     uint64_t def_counter = 0;
 
@@ -115,6 +130,7 @@ class [[eosio::contract]] mainloan : public eosio::contract{
               borr_table(receiver, code.value),
               uwr_table(receiver, code.value),
               loan_table(receiver, code.value),
+              schedule_table(receiver, code.value),
               deferred_table(receiver, code.value){}
 
 
@@ -127,8 +143,10 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     void adduwr(name acc_name, uint64_t acc_id, uint64_t balance);
 
     [[eosio::action]]
-    void addloan(name uwr_name, name borr_name, uint64_t loan_amnt, double rate, uint64_t pay_time,
-                  uint64_t time_stmp, bool type);
+    void addloan(name uwr_name, name borr_name, double loan_amnt, double rate, uint64_t pay_time);
+
+    [[eosio::action]]
+    void addinstl(uint64_t loan_id, uint64_t disbursal_time, uint64_t paid_time, uint64_t instl_paid);
 
     [[eosio::action]]
     void getborrower(name acc_name);

@@ -34,6 +34,28 @@
             ]
         },
         {
+            "name": "addinstl",
+            "base": "",
+            "fields": [
+                {
+                    "name": "loan_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "disbursal_time",
+                    "type": "uint64"
+                },
+                {
+                    "name": "paid_time",
+                    "type": "uint64"
+                },
+                {
+                    "name": "instl_paid",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "addloan",
             "base": "",
             "fields": [
@@ -47,7 +69,7 @@
                 },
                 {
                     "name": "loan_amnt",
-                    "type": "uint64"
+                    "type": "float64"
                 },
                 {
                     "name": "rate",
@@ -56,14 +78,6 @@
                 {
                     "name": "pay_time",
                     "type": "uint64"
-                },
-                {
-                    "name": "time_stmp",
-                    "type": "uint64"
-                },
-                {
-                    "name": "type",
-                    "type": "bool"
                 }
             ]
         },
@@ -130,10 +144,6 @@
                 {
                     "name": "uwr_name",
                     "type": "name"
-                },
-                {
-                    "name": "lending_amount",
-                    "type": "uint64"
                 },
                 {
                     "name": "borr_name",
@@ -211,7 +221,7 @@
                 },
                 {
                     "name": "lending_amount",
-                    "type": "uint64"
+                    "type": "float64"
                 },
                 {
                     "name": "borr_name",
@@ -238,16 +248,12 @@
                     "type": "float64"
                 },
                 {
-                    "name": "type",
-                    "type": "bool"
-                },
-                {
                     "name": "loan_instl",
                     "type": "uint64"
                 },
                 {
                     "name": "time_stmp",
-                    "type": "time_point_sec"
+                    "type": "uint64"
                 },
                 {
                     "name": "status",
@@ -276,6 +282,64 @@
                 {
                     "name": "sent_trx",
                     "type": "bytes"
+                }
+            ]
+        },
+        {
+            "name": "schedule_info",
+            "base": "",
+            "fields": [
+                {
+                    "name": "loan_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "installment_num",
+                    "type": "uint64"
+                },
+                {
+                    "name": "total_lent_amnt",
+                    "type": "float64"
+                },
+                {
+                    "name": "disbursal_time",
+                    "type": "uint64"
+                },
+                {
+                    "name": "annual_interest",
+                    "type": "float64"
+                },
+                {
+                    "name": "total_time",
+                    "type": "float64"
+                },
+                {
+                    "name": "paid_time",
+                    "type": "uint64"
+                },
+                {
+                    "name": "instl_paid",
+                    "type": "float64"
+                },
+                {
+                    "name": "days",
+                    "type": "uint64"
+                },
+                {
+                    "name": "remaining_amnt",
+                    "type": "float64"
+                },
+                {
+                    "name": "ipd",
+                    "type": "float64"
+                },
+                {
+                    "name": "interest_amnt",
+                    "type": "float64"
+                },
+                {
+                    "name": "principal_amnt",
+                    "type": "float64"
                 }
             ]
         },
@@ -357,6 +421,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "addinstl",
+            "type": "addinstl",
+            "ricardian_contract": ""
+        },
+        {
             "name": "addloan",
             "type": "addloan",
             "ricardian_contract": ""
@@ -420,6 +489,13 @@
         {
             "name": "loan",
             "type": "loan_info",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "schedule",
+            "type": "schedule_info",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

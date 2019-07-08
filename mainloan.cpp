@@ -35,23 +35,7 @@ void mainloan::adduwr(name acc_name, uint64_t acc_id, uint64_t balance)
       });
 }
 
-void mainloan::getborrower(name acc_name){
-
-  auto borrower = borr_table.get(acc_name.value);
-  eosio::check(borrower.acc_name==acc_name, "Borrower doesn't exist.");
-
-  eosio::print("Borrower Details: ", borrower.acc_name);
-  eosio::print("ID: ", borrower.b_id);
-  eosio::print("Location: ", borrower.location);
-  eosio::print("Phone Number: ", borrower.b_phone);
-  eosio::print("Loan Individual: ", borrower.loan_individual);
-  eosio::print("Balance: ", borrower.credit_amnt);
-  eosio::print("Credit Score: ", borrower.credit_score);
-
-  send("bubblebee123"_n, 1, acc_name, 1000, 1);
-}
-
-void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, double rate, uint64_t pay_time, uint64_t time_stmp=now(), bool type=0){
+void mainloan::addloan(name uwr_name, name borr_name, double loan_amnt, double rate, uint64_t pay_time){
 
   require_auth( _self );
   eosio::check(loan_amnt>0, "Cannot loan in negatives!");
@@ -71,13 +55,55 @@ void mainloan::addloan(name uwr_name, name borr_name, uint64_t loan_amnt, double
     l.borr_id = borrower->b_id;
     l.interest_rate = rate;
     l.payment_time = pay_time;
-    rate /= 1200;
-    l.emi = loan_amnt*rate*pow(1+rate, pay_time)/(pow(1+rate, pay_time)-1);
-    l.return_value = l.emi*pay_time;
-    l.time_stmp = time_point_sec(time_stmp);
-    l.type = type;
+    //rate /= 1200;
+    //l.emi = loan_amnt*rate*pow(1+rate, pay_time)/(pow(1+rate, pay_time)-1);
+    //l.return_value = l.emi*pay_time;
+    l.time_stmp = now();
+    //l.type = type;
   });
   print("Loan Added");
+}
+
+void mainloan::addinstl(uint64_t loan_id, uint64_t disbursal_time, uint64_t paid_time, uint64_t instl_paid){
+  auto itr = loan_table.find(loan_id);
+  auto itr2 = schedule_table.find(loan_id);
+  eosio::check(itr!=loan_table.end(), "Loan doesn't exist.");
+  if (itr2!=schedule_table.end())
+    eosio::check((itr2->installment_num)<=4, "Term for this loan has expired.");
+  eosio::check(instl_paid>((itr->interest_rate)/100*((paid_time-disbursal_time)/(3600000*365))), "Minimum amount of the interest rate should be paid.");
+
+
+  schedule_table.emplace(get_self(), [&](auto &s){
+    s.loan_id = loan_id;
+    s.installment_num = s.installment_num++;
+    s.disbursal_time = disbursal_time;
+    s.total_lent_amnt = itr->lending_amount;
+    s.annual_interest = itr->interest_rate;
+    s.total_time = itr->payment_time;
+    s.instl_paid = instl_paid;
+    s.paid_time = paid_time;
+    s.days = (paid_time-disbursal_time)/(3600000*365);
+    (s.installment_num==1? s.remaining_amnt=(s.total_lent_amnt)-(s.instl_paid) : s.remaining_amnt-= s.instl_paid);
+    s.ipd = (s.annual_interest)/100*(1/365);
+    s.interest_amnt = (s.ipd)*(s.days)*(s.remaining_amnt);
+    s.principal_amnt = (s.instl_paid)-(s.interest_amnt);
+  });
+}
+
+void mainloan::getborrower(name acc_name){
+
+  auto borrower = borr_table.get(acc_name.value);
+  eosio::check(borrower.acc_name==acc_name, "Borrower doesn't exist.");
+
+  eosio::print("Borrower Details: ", borrower.acc_name);
+  eosio::print("ID: ", borrower.b_id);
+  eosio::print("Location: ", borrower.location);
+  eosio::print("Phone Number: ", borrower.b_phone);
+  eosio::print("Loan Individual: ", borrower.loan_individual);
+  eosio::print("Balance: ", borrower.credit_amnt);
+  eosio::print("Credit Score: ", borrower.credit_score);
+
+  send("bubblebee123"_n, 1, acc_name, 1000, 1);
 }
 
 void mainloan::getuwr(name acc_name){
@@ -116,11 +142,11 @@ void mainloan::defincr(name from, uint64_t loanpm, name to, uint64_t loan_id)
         borr_table.modify(itr, from, [&](auto& o){    //record, payer, new changed record
           o.credit_amnt += loanpm;
         });
-        auto itr3 = loan_table.find(loan_id);
-        addloan(from, to, itr3->lending_amount, itr3->interest_rate, itr3->payment_time, now(), 1);
-        loan_table.modify(itr3, from, [&](auto& o){
-          o.loan_instl += 1;
-        });
+        // auto itr3 = loan_table.find(loan_id);
+        // addloan(from, to, itr3->lending_amount, itr3->interest_rate, itr3->payment_time);
+        // loan_table.modify(itr3, from, [&](auto& o){
+        //   o.loan_instl += 1;
+        // });
         eosio::print("Deferred loan from ", from, " for credit of ", loanpm, " to ", to);
 }
 
@@ -173,7 +199,6 @@ void mainloan::updatescore(name acc_name ,uint64_t credit_score,uint64_t status,
       eosio::check(borrower.acc_name==acc_name, "Borrower doesn't exist.");
 
       //Update_credit_score function here
-
 }
 
 
