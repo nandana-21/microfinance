@@ -21,4 +21,4 @@ Microfinance, also called Microcredit​, is a type of banking service that is p
 
 ## Proposed Solution ##
 
-![](images/Microfinance.png)
+![](images/microfinance.png)
