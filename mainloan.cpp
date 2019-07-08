@@ -35,12 +35,12 @@ void mainloan::adduwr(name acc_name, uint64_t acc_id, uint64_t balance)
       });
 }
 
-void mainloan::addloan(name uwr_name, name borr_name, double loan_amnt, double rate, uint64_t pay_time){
+void mainloan::addloan(name uwr_name, name borr_name, double loan_amnt, double rate, uint64_t time_stmp){
 
   require_auth( _self );
   eosio::check(loan_amnt>0, "Cannot loan in negatives!");
   eosio::check(rate>=0, "Interst rate cannot be negative!");
-  eosio::check(pay_time>0, "Cannot be zero or negative!");
+  //eosio::check(pay_time>0, "Cannot be zero or negative!");
   auto borrower = borr_table.find(borr_name.value);
   auto uwr = uwr_table.find(uwr_name.value);
   eosio::check(borrower!=borr_table.end(), "Borrower doesn't exist.");
@@ -54,11 +54,10 @@ void mainloan::addloan(name uwr_name, name borr_name, double loan_amnt, double r
     l.borr_name = borr_name;
     l.borr_id = borrower->b_id;
     l.interest_rate = rate;
-    l.payment_time = pay_time;
     //rate /= 1200;
     //l.emi = loan_amnt*rate*pow(1+rate, pay_time)/(pow(1+rate, pay_time)-1);
     //l.return_value = l.emi*pay_time;
-    l.time_stmp = now();
+    l.time_stmp = time_stmp;
     //l.type = type;
   });
   print("Loan Added");
@@ -88,6 +87,8 @@ void mainloan::addinstl(uint64_t loan_id, uint64_t disbursal_time, uint64_t paid
     s.interest_amnt = (s.ipd)*(s.days)*(s.remaining_amnt);
     s.principal_amnt = (s.instl_paid)-(s.interest_amnt);
   });
+
+  print("Installment added.");
 }
 
 void mainloan::getborrower(name acc_name){
@@ -123,13 +124,13 @@ void mainloan::getloan(uint64_t loan_id){  //Loan ID to be taken or another key 
 
   eosio::print("loan details :", loaninfo.loan_id);
   eosio::print("borrower name :", loaninfo.borr_name);
-  eosio::print("borrower name :", loaninfo.uwr_name);
+  eosio::print("underwriter name :", loaninfo.uwr_name);
   eosio::print("lending amount :", loaninfo.lending_amount);
   eosio::print("Interst rate :", loaninfo.interest_rate);
   eosio::print("Payment time :", loaninfo.payment_time);
-  eosio::print("emi :", loaninfo.emi);
+  //eosio::print("emi :", loaninfo.emi);
   //eosio::print("Time stamp: ", std::to_string(loaninfo.time_stmp));
-  eosio::print("Total amount to be returned", loaninfo.return_value);
+  //eosio::print("Total amount to be returned", loaninfo.return_value);
 }
 
 void mainloan::defincr(name from, uint64_t loanpm, name to, uint64_t loan_id)
@@ -211,7 +212,7 @@ extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
   }
   else{
     switch(action){
-      EOSIO_DISPATCH_HELPER(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(send)(getloan)(updatescore))
+      EOSIO_DISPATCH_HELPER(mainloan, (addborrower)(adduwr)(addloan)(getborrower)(getuwr)(defincr)(send)(getloan)(updatescore)(addinstl))
     }
     eosio_exit(0);
   }

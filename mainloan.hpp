@@ -49,12 +49,12 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       uint64_t borr_id;
       double interest_rate;     //annual
       uint64_t payment_time = 30;    //total time ~ month
-      double emi;               //not required?
-      double return_value;      //not required?
+      //double emi;               //not required?
+      //double return_value;      //not required?
       //bool type; //0-normal loan; 1-installment loan
-      uint64_t loan_instl = 1;
+      //uint64_t loan_instl = 1;
       uint64_t time_stmp;   //date ka bhi daalna hai
-      bool status=0;
+      //bool status=0;
 
       uint64_t primary_key() const{
         return loan_id;

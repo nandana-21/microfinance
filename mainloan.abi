@@ -240,24 +240,8 @@
                     "type": "uint64"
                 },
                 {
-                    "name": "emi",
-                    "type": "float64"
-                },
-                {
-                    "name": "return_value",
-                    "type": "float64"
-                },
-                {
-                    "name": "loan_instl",
-                    "type": "uint64"
-                },
-                {
                     "name": "time_stmp",
                     "type": "uint64"
-                },
-                {
-                    "name": "status",
-                    "type": "bool"
                 }
             ]
         },
