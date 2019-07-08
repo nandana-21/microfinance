@@ -84,3 +84,9 @@ r - rate of interest per year </br>
 Payment is early and more than required.
 
 ![](images/loan.PNG)
+
+Interest = (o/sp)*days*id </br>
+where:</br>
+o/sp - amount left to repay</br>
+days - number of days since last repayment</br>
+id - interest rate per day
