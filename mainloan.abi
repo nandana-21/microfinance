@@ -25,11 +25,11 @@
                 },
                 {
                     "name": "loan_individual",
-                    "type": "uint64"
+                    "type": "float64"
                 },
                 {
                     "name": "b_balance",
-                    "type": "uint64"
+                    "type": "float64"
                 }
             ]
         },
@@ -51,7 +51,7 @@
                 },
                 {
                     "name": "instl_paid",
-                    "type": "uint64"
+                    "type": "float64"
                 }
             ]
         },
@@ -76,7 +76,7 @@
                     "type": "float64"
                 },
                 {
-                    "name": "pay_time",
+                    "name": "time_stmp",
                     "type": "uint64"
                 }
             ]
@@ -95,7 +95,7 @@
                 },
                 {
                     "name": "balance",
-                    "type": "uint64"
+                    "type": "float64"
                 }
             ]
         },
@@ -121,11 +121,11 @@
                 },
                 {
                     "name": "loan_individual",
-                    "type": "uint64"
+                    "type": "float64"
                 },
                 {
                     "name": "credit_amnt",
-                    "type": "uint64"
+                    "type": "float64"
                 },
                 {
                     "name": "credit_score",
@@ -134,22 +134,19 @@
             ]
         },
         {
-            "name": "deferred_info",
+            "name": "checkstat",
             "base": "",
             "fields": [
                 {
                     "name": "loan_id",
                     "type": "uint64"
-                },
-                {
-                    "name": "uwr_name",
-                    "type": "name"
-                },
-                {
-                    "name": "borr_name",
-                    "type": "name"
                 }
             ]
+        },
+        {
+            "name": "clearall",
+            "base": "",
+            "fields": []
         },
         {
             "name": "defincr",
@@ -161,7 +158,7 @@
                 },
                 {
                     "name": "loanpm",
-                    "type": "uint64"
+                    "type": "float64"
                 },
                 {
                     "name": "to",
@@ -185,6 +182,16 @@
         },
         {
             "name": "getloan",
+            "base": "",
+            "fields": [
+                {
+                    "name": "loan_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "getschedule",
             "base": "",
             "fields": [
                 {
@@ -240,8 +247,16 @@
                     "type": "uint64"
                 },
                 {
+                    "name": "inc_loan",
+                    "type": "float64"
+                },
+                {
                     "name": "time_stmp",
                     "type": "uint64"
+                },
+                {
+                    "name": "status",
+                    "type": "bool"
                 }
             ]
         },
@@ -274,6 +289,10 @@
             "base": "",
             "fields": [
                 {
+                    "name": "sch_id",
+                    "type": "uint64"
+                },
+                {
                     "name": "loan_id",
                     "type": "uint64"
                 },
@@ -295,7 +314,7 @@
                 },
                 {
                     "name": "total_time",
-                    "type": "float64"
+                    "type": "uint64"
                 },
                 {
                     "name": "paid_time",
@@ -328,32 +347,6 @@
             ]
         },
         {
-            "name": "send",
-            "base": "",
-            "fields": [
-                {
-                    "name": "from",
-                    "type": "name"
-                },
-                {
-                    "name": "check",
-                    "type": "bool"
-                },
-                {
-                    "name": "to",
-                    "type": "name"
-                },
-                {
-                    "name": "loanpm",
-                    "type": "uint64"
-                },
-                {
-                    "name": "loan_id",
-                    "type": "uint64"
-                }
-            ]
-        },
-        {
             "name": "underwriter_info",
             "base": "",
             "fields": [
@@ -367,33 +360,7 @@
                 },
                 {
                     "name": "balance",
-                    "type": "uint64"
-                }
-            ]
-        },
-        {
-            "name": "updatescore",
-            "base": "",
-            "fields": [
-                {
-                    "name": "borr_name",
-                    "type": "name"
-                },
-                {
-                    "name": "credit_score",
-                    "type": "uint64"
-                },
-                {
-                    "name": "status",
-                    "type": "uint64"
-                },
-                {
-                    "name": "loan_instl",
-                    "type": "uint64"
-                },
-                {
-                    "name": "loan_individual",
-                    "type": "uint64"
+                    "type": "float64"
                 }
             ]
         }
@@ -420,6 +387,16 @@
             "ricardian_contract": ""
         },
         {
+            "name": "checkstat",
+            "type": "checkstat",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "clearall",
+            "type": "clearall",
+            "ricardian_contract": ""
+        },
+        {
             "name": "defincr",
             "type": "defincr",
             "ricardian_contract": ""
@@ -435,6 +412,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "getschedule",
+            "type": "getschedule",
+            "ricardian_contract": ""
+        },
+        {
             "name": "getuwr",
             "type": "getuwr",
             "ricardian_contract": ""
@@ -443,29 +425,12 @@
             "name": "onanerror",
             "type": "onanerror",
             "ricardian_contract": ""
-        },
-        {
-            "name": "send",
-            "type": "send",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "updatescore",
-            "type": "updatescore",
-            "ricardian_contract": ""
         }
     ],
     "tables": [
         {
             "name": "borrower",
             "type": "borrower_info",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "deferred",
-            "type": "deferred_info",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
