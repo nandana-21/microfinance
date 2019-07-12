@@ -21,7 +21,6 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       uint64_t b_id;
       string location;
       uint64_t b_phone;
-      double loan_individual;       //may not need this
       double credit_amnt;
       uint64_t credit_score=0;
 
@@ -51,11 +50,7 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       uint64_t payment_time = 1; //month   //total time ~ 1month ~ 30days
       double inc_loan;      //NOT NEEDED?
       uint64_t terms = 4; //4 weeks per month => each installment
-      //double emi;               //not required?
-      //double return_value;      //not required?
-      //bool type; //0-normal loan; 1-installment loan
-      //uint64_t loan_instl = 1;
-      uint64_t time_stmp;   //date ka bhi daalna hai
+      uint64_t time_stmp;
       bool status = 0;
       double late_pay_fee=0;
       uint64_t disb_num=0;
@@ -108,26 +103,6 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       }
     };
 
-    // struct [[eosio::table]] deferred_info{
-    //   uint64_t loan_id;
-    //   name uwr_name;
-    //   name borr_name;
-    //   //schedule schedule_table;
-    //
-    //   uint64_t primary_key() const{
-    //     return loan_id;
-    //   }
-    // };
-
-    void sendsummary(name user, std::string message){
-      action(
-        permission_level{get_self(),"active"_n},
-        get_self(),
-        "notify"_n,
-        std::make_tuple(user, name{user}.to_string() + message)
-      ).send();
-    }
-
     typedef eosio::multi_index<"borrower"_n, borrower_info> borrower;
     typedef eosio::multi_index<"underwriter"_n, underwriter_info> underwriter;
     typedef eosio::multi_index<"loan"_n, loan_info,
@@ -138,11 +113,10 @@ class [[eosio::contract]] mainloan : public eosio::contract{
                                 indexed_by<"byloanid"_n, const_mem_fun<schedule_info, uint64_t, &schedule_info::get_loan_id>>,
                                 indexed_by<"byinstlnum"_n, const_mem_fun<schedule_info, uint64_t, &schedule_info::get_installment_number>>
                               > schedule;
-    // typedef eosio::multi_index<"deferred"_n, deferred_info> deferred;
+
     borrower borr_table;
     underwriter uwr_table;
     loan loan_table;
-    // deferred deferred_table;
     schedule schedule_table;
 
     uint64_t def_counter = 0;
@@ -160,14 +134,13 @@ class [[eosio::contract]] mainloan : public eosio::contract{
 
     [[eosio::action]]
     void addborrower(name acc_name, uint64_t b_id, string location,
-                        uint64_t b_phone, double loan_individual,
-                        double credit_amnt);
+                        uint64_t b_phone, double credit_amnt);
 
     [[eosio::action]]
     void adduwr(name acc_name, uint64_t acc_id, double balance);
 
     [[eosio::action]]
-    void addloan(uint64_t id, name uwr_name, name borr_name, double loan_amnt, double rate, uint64_t time_stmp);
+    void addloan(name uwr_name, name borr_name, double loan_amnt, double rate, uint64_t time_stmp);
 
     [[eosio::action]]
     void addinstl(uint64_t loan_id, uint64_t paid_time, double instl_paid);
@@ -184,27 +157,12 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     [[eosio::action]]
     void getschedule(uint64_t loan_id);
 
-    // this action will be called by the deferred transaction
-    // deferred loan giving after every month
-
-    [[eosio::action]]
-    void notify(name user, string msg);
-
     [[eosio::action]]
     void defincr(name from, double loanpm, name to, uint64_t loan_id);
-
-    // [[eosio::action]]
-    // void send(name from, bool check, name to, double loanpm, uint64_t loan_id);
 
     [[eosio::action]]
     void onanerror(const onerror &error);
 
-    // [[eosio::action]]
-    // void updatescore(name borr_name,uint64_t credit_score,uint64_t status,
-    //                 uint64_t loan_instl, uint64_t loan_individual);
-
-    // [[eosio::action]]
-    // void schedule();
     [[eosio::action]]
     void sendinstl(uint64_t loan_id);
 

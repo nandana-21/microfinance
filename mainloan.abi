@@ -24,10 +24,6 @@
                     "type": "uint64"
                 },
                 {
-                    "name": "loan_individual",
-                    "type": "float64"
-                },
-                {
                     "name": "credit_amnt",
                     "type": "float64"
                 }
@@ -55,10 +51,6 @@
             "name": "addloan",
             "base": "",
             "fields": [
-                {
-                    "name": "id",
-                    "type": "uint64"
-                },
                 {
                     "name": "uwr_name",
                     "type": "name"
@@ -118,10 +110,6 @@
                 {
                     "name": "b_phone",
                     "type": "uint64"
-                },
-                {
-                    "name": "loan_individual",
-                    "type": "float64"
                 },
                 {
                     "name": "credit_amnt",
@@ -307,20 +295,6 @@
             ]
         },
         {
-            "name": "notify",
-            "base": "",
-            "fields": [
-                {
-                    "name": "user",
-                    "type": "name"
-                },
-                {
-                    "name": "msg",
-                    "type": "string"
-                }
-            ]
-        },
-        {
             "name": "onanerror",
             "base": "",
             "fields": [
@@ -498,11 +472,6 @@
         {
             "name": "getuwr",
             "type": "getuwr",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "notify",
-            "type": "notify",
             "ricardian_contract": ""
         },
         {
