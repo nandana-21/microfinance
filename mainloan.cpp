@@ -35,7 +35,12 @@ void mainloan::adduwr(name acc_name, uint64_t acc_id, double balance)
       });
 }
 
-void mainloan::addloan(name uwr_name, name borr_name, double loan_amnt, double rate, uint64_t time_stmp){
+void mainloan::notify(name user, string msg){
+  require_auth(get_self());
+  require_recipient(user);
+}
+
+void mainloan::addloan(uint64_t l_id, name uwr_name, name borr_name, double loan_amnt, double rate, uint64_t time_stmp){
 
   require_auth( _self );
   eosio::check(loan_amnt>0, "Cannot loan in negatives!");
@@ -47,8 +52,10 @@ void mainloan::addloan(name uwr_name, name borr_name, double loan_amnt, double r
   eosio::check(uwr!=uwr_table.end(), "Lender doesn't exist.");
   eosio::check((uwr->balance)>loan_amnt, "Insufficient funds to lend.");
   print("hi");
+  uint64_t id;
   loan_table.emplace(get_self(), [&](auto &l){
-    l.loan_id = loan_table.available_primary_key();
+    l.loan_id = l_id;//loan_table.available_primary_key();
+    id = l.loan_id;
     l.uwr_name = uwr_name;
     l.uwr_id = uwr->acc_id;
     l.lending_amount = loan_amnt;
@@ -61,12 +68,234 @@ void mainloan::addloan(name uwr_name, name borr_name, double loan_amnt, double r
     //l.emi = loan_amnt*rate*pow(1+rate, pay_time)/(pow(1+rate, pay_time)-1);
     //l.return_value = l.emi*pay_time;
     l.time_stmp = time_stmp;
+    l.msg = to_string(now());
     //l.status = 0; //not completed
     //l.type = type;
   });
+  sendinstl(id);
+  checkperiod(id, 1);
 
-
+  //add first disbursment in borrower account
   print("Loan Added");
+}
+
+void mainloan::addinstl(uint64_t loan_id, uint64_t paid_time, double instl_paid){
+  require_auth(_self);
+  //bool late = 0;
+  bool check=0;     // to check if the first installment of the loan in repaid.
+  double calc_days;
+  bool minamnt;
+  uint64_t disbursal_time;
+  uint64_t excess;
+
+  auto itr = loan_table.find(loan_id);
+  auto itr2 = schedule_table.find((loan_id+1)*100+itr->instl_num-1);
+  print("loanidtofind ", (loan_id+1)*100+itr->instl_num-1, "starttime: ", itr2->start_time);
+  // auto id_recs = schedule_table.get_index<("byloanid"_n)>();
+  // auto instl_recs = schedule_table.get_index<("byinstlnum"_n)>();
+  // auto id_itr = id_recs.find(loan_id);
+  // while()
+  (itr2!=schedule_table.end()? disbursal_time=itr2->paid_time : disbursal_time=itr->time_stmp);
+  print("disbursal tiemd: ", disbursal_time);
+  calc_days = (paid_time-disbursal_time)/(1000*60*60*24.0);
+  if (itr2!=schedule_table.end() && itr2->fee_next_instl!=0){
+    ((instl_paid>((itr->interest_rate)/100*(int(calc_days)/365))+(itr2->fee_next_instl))? minamnt=1 : minamnt=0);
+  }
+  else{
+    ((instl_paid>((itr->interest_rate)/100*(int(calc_days)/365)))? minamnt=1 : minamnt=0);
+  }
+  eosio::check(minamnt==1, "Minimum amount of the interest rate should be paid, please check if an earlier late fee has been charged.");
+  if (itr2!=schedule_table.end()){
+    eosio::check((itr2->installment_num)<=4, "Term for this loan has expired.");
+  }
+
+  //(paid_time>(disbursal_time+7*24*60*60*1000)? late=1 : late=0);
+  eosio::check(itr!=loan_table.end(), "Loan doesn't exist.");
+
+  // if (late != 1){
+  //   calc_days = (paid_time-disbursal_time)/(1000*60*60*24);
+  // }
+  // else{
+  //   calc_days = ((itr->payment_time)*30/(itr->terms));
+  // }
+
+
+  schedule_table.emplace(get_self(), [&](auto &s){
+    (itr2!=schedule_table.end()? s.sch_id=itr2->sch_id+1 : s.sch_id=(loan_id+1)*100);          //schedule_table.available_primary_key();
+    s.loan_id = loan_id;
+    if (itr2!=schedule_table.end()){
+      s.installment_num = (itr2->installment_num)+1;
+    }
+    else{
+      s.installment_num++;
+    }
+    loan_table.modify(itr, _self, [&](auto& l){
+      l.instl_num++;
+    });
+    uint64_t inum = s.installment_num;
+    // (s.installment_num==4? check=1 : check=0); //to check if first installment is paid; installment==4 wont work then
+    (s.installment_num==1? s.start_time=disbursal_time : s.start_time=itr2->paid_time);     //needs to change every week. //HARDCODE!!
+    s.lent_amnt = itr->lending_amount;
+    s.annual_interest = itr->interest_rate;
+    s.total_time = itr->payment_time;
+    s.instl_paid = instl_paid;
+    s.paid_time = paid_time;
+    s.ipd = (s.annual_interest)/(100*365);
+    s.days = calc_days;
+    (s.days>int((itr->payment_time)*30/(itr->terms))?
+        s.interest_amnt=(s.ipd)*(int((itr->payment_time)*30/(itr->terms))) : s.interest_amnt=(s.ipd)*(int(s.days)));
+    print("hi again: ", s.ipd*int(s.days));
+    (s.installment_num==1? s.interest_amnt*=s.lent_amnt : s.interest_amnt*=itr2->remaining_amnt);
+    s.principal_amnt = (s.instl_paid)-(s.interest_amnt);
+    (s.installment_num==1? s.remaining_amnt=(s.lent_amnt)-(s.principal_amnt) : s.remaining_amnt= itr2->remaining_amnt-s.principal_amnt);
+    if (itr->late_pay_fee!=0){
+      s.fee_next_instl = itr->late_pay_fee;
+      loan_table.modify(itr, _self, [&](auto& l){
+        l.late_pay_fee=0;
+        l.msg="modified";
+      });
+    }
+
+    if (itr2!=schedule_table.end() && itr2->fee_next_instl!=0){
+      s.remaining_amnt += itr2->fee_next_instl;
+    }
+    if (s.remaining_amnt<=0){
+      check=1;
+      excess = s.remaining_amnt;
+    }
+  });
+
+  // sendinstl(loan_id);
+
+  if (check==1){
+    loan_table.modify(itr, _self, [&](auto &l){
+      l.status = 1;
+    });
+    auto itr1 = borr_table.find(itr->borr_name.value);
+    borr_table.modify(itr1, _self, [&](auto& b){
+      b.credit_amnt-=excess;
+    });
+    sendinstl(loan_id);
+  }
+
+  // if (calc_days<(disbursal_time/(24*60*60*1000)+((itr->payment_time)*30/(itr->terms)))){
+  //   checkperiod(loan_id, itr->instl_num+1);
+  // }
+  // else{
+  //   checkperiod(loan_id, )
+  // }
+
+  checkperiod(loan_id, itr->instl_num+1);
+
+  print("Installment added.");
+}
+
+void mainloan::sendinstl(uint64_t loan_id){
+  require_auth(get_self());
+  auto itr = loan_table.get(loan_id);
+
+  eosio::transaction t{};
+  eosio::print("  empty txn created.    ");
+  t.actions.emplace_back(
+      permission_level(get_self(), "active"_n),
+      get_self(),
+      "defincr"_n,
+      std::make_tuple(itr.uwr_name, itr.lending_amount, itr.borr_name, loan_id));
+  eosio::print("  action inserted in txn w delay set.   ");
+
+ t.delay_sec = 10;//30*24*60*60;   //delay in seconds => 1 month in sec
+ eosio::print(" delay set.    ");
+ t.send(now(), get_self() /*, false */);
+ eosio::print(" tnx sent.   ");
+}
+
+void mainloan::defincr(name from, double loanpm, name to, uint64_t loan_id)
+{
+        //eosio::print("Hello123");
+        require_auth(get_self());
+
+        auto itr = borr_table.find(to.value);
+        auto itr1 = loan_table.find(loan_id);
+        if (itr1->status==1 || itr1->disb_num==0){
+          borr_table.modify(itr, _self, [&](auto& o){    //record, payer, new changed record
+            o.credit_amnt -= loanpm;    //money disbursed
+        //   //  return;
+          });
+          loan_table.modify(itr1, _self, [&](auto& l){
+            l.disb_num += 1;
+          });
+        }
+        // auto itr1 = loan_table.get(loan_id);
+        // loan_table.modify(itr1, to, [&](auto &l){
+        //   l.status=0;
+        // });
+        //}
+        //checkstat(loan_id);
+        //auto itr2 = uwr_table.find(from.value);
+
+        // auto itr3 = loan_table.find(loan_id);
+        // addloan(from, to, itr3->lending_amount, itr3->interest_rate, itr3->payment_time);
+        // loan_table.modify(itr3, from, [&](auto& o){
+        //   o.loan_instl += 1;
+        // });
+        eosio::print("New installment sent from ", from, " for credit of ", loanpm, " to ", to);
+
+}
+
+void mainloan::checkperiod(uint64_t loan_id, uint64_t instl_check, uint64_t delay){
+  require_auth(get_self());
+  auto itr = loan_table.get(loan_id);
+  auto itr1 = loan_table.find(loan_id);
+
+  eosio::transaction t{};
+  eosio::print("  second txn created.    ");
+  t.actions.emplace_back(
+      permission_level(get_self(), "active"_n),
+      get_self(),
+      "checkpayment"_n,
+      std::make_tuple(loan_id, instl_check)); //NEED TO CORRECT THIS
+  eosio::print("  |||||action inserted in txn w delay set.   ");
+  // if (delay==60*3){
+  //   loan_table.modify(itr1, _self, [&](auto& l){
+  //     l.msg.append("  3 min"+to_string(now()));
+  //   });
+  // }
+  // else if (delay==60*5){
+  //   loan_table.modify(itr1, _self, [&](auto& l){
+  //     l.msg.append("  5 min"+to_string(now()));
+  //   });
+  // }
+  // else{
+  //   loan_table.modify(itr1, _self, [&](auto& l){
+  //     l.msg.append("  pata nahi"+to_string(now()));
+  //   });
+  // }
+ t.delay_sec = delay; //7 days=>1 installment  //30*24*60*60;   //delay in seconds => 1 month in sec
+ eosio::print(" ||delay set.    ");
+ t.send(now()+delay, get_self() /*, false */);
+ eosio::print(" ||tnx sent.   ");
+
+}
+
+void mainloan::checkpayment(uint64_t loan_id, uint64_t instl_check){
+  require_auth(_self);
+
+  //auto index_w_loanid = schedule_table.get_index<"byloanid"_n>();//schedule_table.find(loan_id);
+  auto itr = loan_table.find(loan_id);
+  auto itr1 = schedule_table.find((loan_id+1)*100+instl_check-1);
+  uint64_t fee = 0;
+  if (itr1 == schedule_table.end()){     //check every day if it's paid //after it's paid, get total fine amount and add to next installment
+    checkperiod(loan_id, instl_check, 60*2);//60*60*24);
+    loan_table.modify(itr, _self, [&](auto& l){
+      l.late_pay_fee += (l.interest_rate)/(100*365);
+      l.msg.append(" {"+to_string(l.late_pay_fee)+"} "+to_string(now())+"||");
+    });
+    checkperiod(loan_id, instl_check+1);      //check next week's installment
+    print("Late payment fees charged.");
+  }
+  else{   //first installment paid
+    checkperiod(loan_id, instl_check+1);
+  }
 }
 
 void mainloan::clearall(){
@@ -78,86 +307,26 @@ void mainloan::clearall(){
   // auto itr1 = uwr_table.begin();
   // while (itr1 != uwr_table.end()){
   //   itr1 = uwr_table.erase(itr1);
-  //
-  // auto itr2 = loan_table.begin();
-  // while (itr2 != loan_table.end()){
-  //   itr2 = loan_table.erase(itr2);
   // }
-  // auto itr3 = schedule_table.begin();
-  // while (itr3 != schedule_table.end()){
-  //   itr3 = schedule_table.erase(itr3);
-  // }
-  auto itr = loan_table.find(0);
-  loan_table.modify(itr, _self, [&](auto& l){
+  auto itr2 = loan_table.begin();
+  while (itr2 != loan_table.end()){
+    itr2 = loan_table.erase(itr2);
+  }
+  auto itr3 = schedule_table.begin();
+  while (itr3 != schedule_table.end()){
+    itr3 = schedule_table.erase(itr3);
+  }
+  // auto itr = schedule_table.find(0);
+  // schedule_table.modify(itr, _self, [&](auto& s){
     // l.lending_amount = 1200;
     // l.interest_rate = 10;
     // l.payment_time = 30; //days
     // l.inc_loan = (l.lending_amount)/4.0;
-    l.time_stmp = 1562592888435;
+    //s.paid_time = 1562747553653;
+    // s.days = (1562747553653-1562592888435)/(1000*60*60*24);
+    // s.interest_amnt = (s.ipd)*(int(s.days))*(s.remaining_amnt);
     //l.status = false;
-  });
-}
-
-void mainloan::addinstl(uint64_t loan_id, uint64_t disbursal_time, uint64_t paid_time, double instl_paid){
-  auto itr = loan_table.find(loan_id);
-  auto itr2 = schedule_table.find(loan_id);
-  eosio::check(itr!=loan_table.end(), "Loan doesn't exist.");
-  if (itr2!=schedule_table.end())
-    eosio::check((itr2->installment_num)<=4, "Term for this loan has expired.");
-  eosio::check(instl_paid>((itr->interest_rate)/100*((paid_time-disbursal_time)/(3600000*365))), "Minimum amount of the interest rate should be paid.");
-
-  bool check=0;
-
-  schedule_table.emplace(get_self(), [&](auto &s){
-    s.sch_id = schedule_table.available_primary_key();
-    s.loan_id = loan_id;
-    if (itr2!=schedule_table.end()){
-      s.installment_num = (itr2->installment_num)+1;
-    }
-    else{
-      s.installment_num++;
-    }
-    (s.installment_num==4? check=1 : check=0);
-    s.disbursal_time = disbursal_time;
-    s.total_lent_amnt = itr->lending_amount;
-    s.annual_interest = itr->interest_rate;
-    s.total_time = itr->payment_time;
-    s.instl_paid = instl_paid;
-    s.paid_time = paid_time;
-    s.days = (paid_time-disbursal_time)/(3600000*365);
-    (s.installment_num==1? s.remaining_amnt=(s.total_lent_amnt)-(s.instl_paid) : s.remaining_amnt-= s.instl_paid);
-    (s.remaining_amnt==0? check=1 : check=0);
-    s.ipd = (s.annual_interest)/(100*365);
-    s.interest_amnt = (s.ipd)*(s.days)*(s.remaining_amnt);
-    s.principal_amnt = (s.instl_paid)-(s.interest_amnt);
-  });
-
-  if (check==1){
-    loan_table.modify(itr, _self, [&](auto &l){
-      l.status = 1;
-    });
-    //checkstat(loan_id);
-  }
-
-  print("Installment added.");
-}
-
-void mainloan::checkstat(uint64_t loan_id){
-  auto itr = loan_table.get(loan_id);
-
-  eosio::transaction t{};
-  eosio::print("  empty txn created.    ");
-  t.actions.emplace_back(
-      permission_level(itr.uwr_name, "active"_n),
-      _self,
-      "defincr"_n,
-      std::make_tuple(itr.uwr_name, itr.inc_loan, itr.borr_name, loan_id));
-  eosio::print("  action inserted in txn w delay set.   ");
-
- t.delay_sec = 10;//30*24*60*60;   //delay in seconds => 1 month in sec
- eosio::print(" delay set.    ");
- t.send(_self.value, itr.uwr_name /*, false */);
- eosio::print(" tnx sent.   ");
+  // });
 }
 
 void mainloan::getborrower(name acc_name){
@@ -213,8 +382,8 @@ void mainloan::getschedule(uint64_t sch_id){  //Loan ID to be taken or another k
   eosio::print("schedule details :", schdinfo.sch_id);
   eosio::print("        loan id :", schdinfo.loan_id);
   eosio::print("        installment number :", schdinfo.installment_num);
-  eosio::print("        total lent amount :", schdinfo.total_lent_amnt);
-  eosio::print("        disbursal time :", schdinfo.disbursal_time);
+  eosio::print("        total lent amount :", schdinfo.lent_amnt);
+  eosio::print("        disbursal time :", schdinfo.start_time);
   eosio::print("        annual interst  :", schdinfo.annual_interest);
   eosio::print("        total time :", schdinfo.total_time);
   eosio::print("        paid time :", schdinfo.paid_time);
@@ -229,35 +398,6 @@ void mainloan::getschedule(uint64_t sch_id){  //Loan ID to be taken or another k
   //eosio::print("Total amount to be returned", loaninfo.return_value);
 }
 
-void mainloan::defincr(name from, double loanpm, name to, uint64_t loan_id)
-{
-        //eosio::print("Hello123");
-        require_auth(from);
-
-        auto itr = borr_table.find(to.value);
-        auto itr1 = loan_table.get(loan_id);
-        if (itr1.status == 1){
-          borr_table.modify(itr, from, [&](auto& o){    //record, payer, new changed record
-            o.credit_amnt += loanpm;
-        //   //  return;
-          });
-        }
-        // auto itr1 = loan_table.get(loan_id);
-        // loan_table.modify(itr1, to, [&](auto &l){
-        //   l.status=0;
-        // });
-        //}
-        //checkstat(loan_id);
-        //auto itr2 = uwr_table.find(from.value);
-
-        // auto itr3 = loan_table.find(loan_id);
-        // addloan(from, to, itr3->lending_amount, itr3->interest_rate, itr3->payment_time);
-        // loan_table.modify(itr3, from, [&](auto& o){
-        //   o.loan_instl += 1;
-        // });
-        eosio::print("Deferred loan from ", from, " for credit of ", loanpm, " to ", to);
-
-}
 //
 // void mainloan::send(name from, bool check_stat, name to, double loanpm, uint64_t loan_id){
 //         require_auth(from);
@@ -294,7 +434,7 @@ void mainloan::onanerror(const onerror &error){
         if (def_counter<=3){
             eosio::transaction dtrx = error.unpack_sent_trx();
             dtrx.delay_sec = 2;
-            dtrx.send(now(), _self);
+            dtrx.send(_self.value, _self);
         }
         else{
             print("Txn couldnt take place");
@@ -321,7 +461,8 @@ extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action){
   else{
     switch(action){
       EOSIO_DISPATCH_HELPER(mainloan, (addborrower)(adduwr)(addloan)(getborrower)
-                (getuwr)(defincr)(getloan)(addinstl)(checkstat)(clearall)(getschedule))
+                (getuwr)(defincr)(getloan)(addinstl)(sendinstl)(clearall)(getschedule)
+                (checkpayment)(checkperiod)(notify))
     }
     eosio_exit(0);
   }

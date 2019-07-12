@@ -28,7 +28,7 @@
                     "type": "float64"
                 },
                 {
-                    "name": "b_balance",
+                    "name": "credit_amnt",
                     "type": "float64"
                 }
             ]
@@ -39,10 +39,6 @@
             "fields": [
                 {
                     "name": "loan_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "disbursal_time",
                     "type": "uint64"
                 },
                 {
@@ -59,6 +55,10 @@
             "name": "addloan",
             "base": "",
             "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
                 {
                     "name": "uwr_name",
                     "type": "name"
@@ -134,11 +134,33 @@
             ]
         },
         {
-            "name": "checkstat",
+            "name": "checkpayment",
             "base": "",
             "fields": [
                 {
                     "name": "loan_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "instl_check",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "checkperiod",
+            "base": "",
+            "fields": [
+                {
+                    "name": "loan_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "instl_check",
+                    "type": "uint64"
+                },
+                {
+                    "name": "delay",
                     "type": "uint64"
                 }
             ]
@@ -251,12 +273,50 @@
                     "type": "float64"
                 },
                 {
+                    "name": "terms",
+                    "type": "uint64"
+                },
+                {
                     "name": "time_stmp",
                     "type": "uint64"
                 },
                 {
                     "name": "status",
                     "type": "bool"
+                },
+                {
+                    "name": "late_pay_fee",
+                    "type": "float64"
+                },
+                {
+                    "name": "disb_num",
+                    "type": "uint64"
+                },
+                {
+                    "name": "instl_num",
+                    "type": "uint64"
+                },
+                {
+                    "name": "days_passed",
+                    "type": "uint64"
+                },
+                {
+                    "name": "msg",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "notify",
+            "base": "",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "msg",
+                    "type": "string"
                 }
             ]
         },
@@ -301,11 +361,11 @@
                     "type": "uint64"
                 },
                 {
-                    "name": "total_lent_amnt",
+                    "name": "lent_amnt",
                     "type": "float64"
                 },
                 {
-                    "name": "disbursal_time",
+                    "name": "start_time",
                     "type": "uint64"
                 },
                 {
@@ -326,7 +386,7 @@
                 },
                 {
                     "name": "days",
-                    "type": "uint64"
+                    "type": "float64"
                 },
                 {
                     "name": "remaining_amnt",
@@ -341,8 +401,22 @@
                     "type": "float64"
                 },
                 {
+                    "name": "fee_next_instl",
+                    "type": "float64"
+                },
+                {
                     "name": "principal_amnt",
                     "type": "float64"
+                }
+            ]
+        },
+        {
+            "name": "sendinstl",
+            "base": "",
+            "fields": [
+                {
+                    "name": "loan_id",
+                    "type": "uint64"
                 }
             ]
         },
@@ -387,8 +461,13 @@
             "ricardian_contract": ""
         },
         {
-            "name": "checkstat",
-            "type": "checkstat",
+            "name": "checkpayment",
+            "type": "checkpayment",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "checkperiod",
+            "type": "checkperiod",
             "ricardian_contract": ""
         },
         {
@@ -422,8 +501,18 @@
             "ricardian_contract": ""
         },
         {
+            "name": "notify",
+            "type": "notify",
+            "ricardian_contract": ""
+        },
+        {
             "name": "onanerror",
             "type": "onanerror",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "sendinstl",
+            "type": "sendinstl",
             "ricardian_contract": ""
         }
     ],
