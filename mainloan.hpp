@@ -21,8 +21,7 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       uint64_t b_id;
       string location;
       uint64_t b_phone;
-      uint64_t loan_individual;
-      uint64_t credit_amnt;
+      double credit_amnt;
       uint64_t credit_score=0;
 
       auto primary_key()const {
@@ -33,7 +32,7 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     struct [[eosio::table]] underwriter_info{
       name acc_name;
       uint64_t acc_id;
-      uint64_t balance;
+      double balance;
 
       auto primary_key() const{
         return acc_name.value;
@@ -48,13 +47,16 @@ class [[eosio::contract]] mainloan : public eosio::contract{
       name borr_name;
       uint64_t borr_id;
       double interest_rate;     //annual
-      uint64_t payment_time = 30;    //total time ~ month
-      //double emi;               //not required?
-      //double return_value;      //not required?
-      //bool type; //0-normal loan; 1-installment loan
-      //uint64_t loan_instl = 1;
-      uint64_t time_stmp;   //date ka bhi daalna hai
-      //bool status=0;
+      uint64_t payment_time = 1; //month   //total time ~ 1month ~ 30days
+      double inc_loan;      //NOT NEEDED?
+      uint64_t terms = 4; //4 weeks per month => each installment
+      uint64_t time_stmp;
+      bool status = 0;
+      double late_pay_fee=0;
+      uint64_t disb_num=0;
+      uint64_t instl_num=0;
+      uint64_t days_passed=0;
+      string msg="";
 
       uint64_t primary_key() const{
         return loan_id;
@@ -74,22 +76,30 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     };
 
     struct [[eosio::table]] schedule_info{
+      uint64_t sch_id;
       uint64_t loan_id;
       uint64_t installment_num=0;
-      double total_lent_amnt;
-      uint64_t disbursal_time;
+      double lent_amnt;
+      uint64_t start_time;
       double annual_interest;
-      double total_time;
+      uint64_t total_time;
       uint64_t paid_time;
-      double instl_paid=0;
-      uint64_t days;        //since last repayment
+      double instl_paid;
+      double days;        //since last repayment
       double remaining_amnt;
       double ipd;
       double interest_amnt=0;
+      double fee_next_instl=0;
       double principal_amnt=0;
 
       uint64_t primary_key() const{
+        return sch_id;
+      }
+      uint64_t get_loan_id() const{
         return loan_id;
+      }
+      uint64_t get_installment_number() const{
+        return installment_num;
       }
     };
 
@@ -99,25 +109,14 @@ class [[eosio::contract]] mainloan : public eosio::contract{
                                 indexed_by<"byuwr"_n, const_mem_fun<loan_info, uint64_t, &loan_info::get_uwr_id>>,
                                 indexed_by<"byborr"_n, const_mem_fun<loan_info, uint64_t, &loan_info::get_borr_id>>
                               > loan;
-    typedef eosio::multi_index<"schedule"_n, schedule_info> schedule;
-
-    struct [[eosio::table]] deferred_info{
-      uint64_t loan_id;
-      name uwr_name;
-      name borr_name;
-      //schedule schedule_table;
-
-      uint64_t primary_key() const{
-        return loan_id;
-      }
-    };
-    typedef eosio::multi_index<"deferred"_n, deferred_info> deferred;
-
+    typedef eosio::multi_index<"schedule"_n, schedule_info,
+                                indexed_by<"byloanid"_n, const_mem_fun<schedule_info, uint64_t, &schedule_info::get_loan_id>>,
+                                indexed_by<"byinstlnum"_n, const_mem_fun<schedule_info, uint64_t, &schedule_info::get_installment_number>>
+                              > schedule;
 
     borrower borr_table;
     underwriter uwr_table;
     loan loan_table;
-    deferred deferred_table;
     schedule schedule_table;
 
     uint64_t def_counter = 0;
@@ -130,23 +129,21 @@ class [[eosio::contract]] mainloan : public eosio::contract{
               borr_table(receiver, code.value),
               uwr_table(receiver, code.value),
               loan_table(receiver, code.value),
-              schedule_table(receiver, code.value),
-              deferred_table(receiver, code.value){}
+              schedule_table(receiver, code.value){}
 
 
     [[eosio::action]]
     void addborrower(name acc_name, uint64_t b_id, string location,
-                        uint64_t b_phone, uint64_t loan_individual,
-                        uint64_t b_balance);
+                        uint64_t b_phone, double credit_amnt);
 
     [[eosio::action]]
-    void adduwr(name acc_name, uint64_t acc_id, uint64_t balance);
+    void adduwr(name acc_name, uint64_t acc_id, double balance);
 
     [[eosio::action]]
-    void addloan(name uwr_name, name borr_name, double loan_amnt, double rate, uint64_t pay_time);
+    void addloan(name uwr_name, name borr_name, double loan_amnt, double rate, uint64_t time_stmp);
 
     [[eosio::action]]
-    void addinstl(uint64_t loan_id, uint64_t disbursal_time, uint64_t paid_time, uint64_t instl_paid);
+    void addinstl(uint64_t loan_id, uint64_t paid_time, double instl_paid);
 
     [[eosio::action]]
     void getborrower(name acc_name);
@@ -157,22 +154,25 @@ class [[eosio::contract]] mainloan : public eosio::contract{
     [[eosio::action]]
     void getloan(uint64_t loan_id);
 
-    // this action will be called by the deferred transaction
-    // deferred loan giving after every month
     [[eosio::action]]
-    void defincr(name from, uint64_t loanpm, name to, uint64_t loan_id);
+    void getschedule(uint64_t loan_id);
 
     [[eosio::action]]
-    void send(name from, bool check, name to, uint64_t loanpm, uint64_t loan_id);
+    void defincr(name from, double loanpm, name to, uint64_t loan_id);
 
     [[eosio::action]]
     void onanerror(const onerror &error);
 
     [[eosio::action]]
-    void updatescore(name borr_name,uint64_t credit_score,uint64_t status,
-                    uint64_t loan_instl, uint64_t loan_individual);
+    void sendinstl(uint64_t loan_id);
 
-    // [[eosio::action]]
-    // void schedule();
+    [[eosio::action]]
+    void clearall();
+
+    [[eosio::action]]
+    void checkperiod(uint64_t loan_id, uint64_t instl_check, uint64_t delay=60*10);//60*60*24*7);
+
+    [[eosio::action]]
+    void checkpayment(uint64_t loan_id, uint64_t instl_check);
 
 };
